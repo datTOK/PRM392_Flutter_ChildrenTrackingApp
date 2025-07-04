@@ -42,11 +42,19 @@ class _RootPageState extends State<RootPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Children Tracking App', style: TextStyle(color: Colors.white)),
+        title: const Text("Children Tracking App"),
         centerTitle: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+              bottomRight: Radius.circular(25),
+              bottomLeft: Radius.circular(25)),
+        ),
+        toolbarHeight: 40,
+        elevation: 5.00,
         backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
       ),
-      body: _pages[_selectedIndex], // Display the selected page
+      body: _pages[_selectedIndex], 
       bottomNavigationBar: Container(
         color: Colors.black,
         child: Padding(
