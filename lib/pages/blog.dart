@@ -1,16 +1,107 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class BlogPage extends StatelessWidget {
+class BlogPage extends StatefulWidget {
   const BlogPage({super.key});
+
+  @override
+  State<BlogPage> createState() => _BlogPageState();
+}
+
+class _BlogPageState extends State<BlogPage> {
+  bool _isLoading = false;
+  List<dynamic> _blogPosts = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchBlogPosts();
+  }
+
+  void _showSnackBar(String message, {Color backgroundColor = Colors.red}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: backgroundColor,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  Future<void> _fetchBlogPosts() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final String apiUrl = 'https://child-tracking-dotnet.onrender.com/api/Blog';
+
+    try {
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'accept': 'text/plain',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Parse the JSON response
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        // Handle the blog posts as needed
+        setState(() {
+          _blogPosts = responseData['data'] ?? [];
+        });
+      } else {
+        _showSnackBar('Failed to load blog posts: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      _showSnackBar('Error fetching blog posts: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Text('Blog Page Content', 
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
-        ),
-      ), 
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _blogPosts.isEmpty
+          ? const Center(child: Text('No blog posts available.'))
+          : ListView.builder(
+              itemCount: _blogPosts.length,
+              itemBuilder: (context, index) {
+                final post = _blogPosts[index];
+                return Card(
+                  margin: const EdgeInsets.all(8.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  elevation: 20.0,
+                  shadowColor: Colors.blue.shade100,
+                  clipBehavior: Clip.antiAlias,
+                  child: Column(
+                    children: [
+                      ListTile(
+                        title: Text(post['title'] ?? 'No Title'),
+                        subtitle: Text(post['content'] ?? 'No Content'),
+                        tileColor: Colors.blue.shade300,
+                      ),
+                      Image.network(
+                        post['imageUrl'] ?? 'https://via.placeholder.com/150',
+                        height: 150,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        isAntiAlias: true,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
     );
   }
 }
