@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http; // Import the http package
-import 'dart:convert'; // For JSON encoding/decoding
-import 'package:children_tracking_mobileapp/main.dart'; // Import main.dart to access RootPage
+import 'package:http/http.dart' as http; 
+import 'dart:convert'; 
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:children_tracking_mobileapp/main.dart'; 
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,7 +14,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _isLoading = false; // State to manage loading indicator
+  bool _isLoading = false; 
 
   @override
   void dispose() {
@@ -32,67 +33,52 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future<void> _login() async {
+    Future<void> _login() async {
     setState(() {
-      _isLoading = true; // Show loading indicator
+      _isLoading = true;
     });
 
-    final String email = _emailController.text.trim();
-    final String password = _passwordController.text.trim();
-
-    if (email.isEmpty || password.isEmpty) {
-      _showSnackBar('Please enter both email and password.');
-      setState(() {
-        _isLoading = false;
-      });
-      return;
-    }
-
     final String apiUrl = 'https://child-tracking-dotnet.onrender.com/api/Auth/login';
+    final Map<String, String> data = {
+      'email': _emailController.text,
+      'password': _passwordController.text,
+    };
 
     try {
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
-          'accept': 'text/plain', // As per the curl command
+          'accept': 'text/plain',
         },
-        body: jsonEncode(<String, String>{
-          'email': email,
-          'password': password,
-        }),
+        body: jsonEncode(data),
       );
 
       if (response.statusCode == 200) {
-        // Login successful
-        final Map<String, dynamic> responseBody = jsonDecode(response.body);
-        final String accessToken = responseBody['accessToken'];
-        final String message = responseBody['message'];
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        final String? accessToken = responseData['accessToken'];
 
-        print('Login Successful: $message');
-        print('Access Token: $accessToken');
+        if (accessToken != null) {
+          // Save the access token
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('accessToken', accessToken);
 
-        _showSnackBar('Login successful!', backgroundColor: Colors.green);
-
-        // Navigate to RootPage after successful login
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const RootPage()),
-        );
+          // Navigate to RootPage (your main app content)
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const RootPage()),
+          );
+        } else {
+          _showSnackBar('Login failed: Access token not found.');
+        }
       } else {
-        // Login failed
-        final Map<String, dynamic> errorBody = jsonDecode(response.body);
-        final String errorMessage = errorBody['message'] ?? 'Login failed. Please check your credentials.';
-        print('Login Failed: ${response.statusCode} - $errorMessage');
-        _showSnackBar(errorMessage);
+        _showSnackBar('Login failed: ${response.reasonPhrase}');
       }
     } catch (e) {
-      // Handle network errors or other exceptions
-      print('Error during login: $e');
-      _showSnackBar('Network error. Please try again later.');
+      _showSnackBar('Error during login: $e');
     } finally {
       setState(() {
-        _isLoading = false; // Hide loading indicator
+        _isLoading = false;
       });
     }
   }
