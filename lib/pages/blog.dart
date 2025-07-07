@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:children_tracking_mobileapp/pages/blog_detail.dart'; 
 
 class BlogPage extends StatefulWidget {
   const BlogPage({super.key});
@@ -67,6 +68,20 @@ class _BlogPageState extends State<BlogPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Blog Posts'),
+        centerTitle: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomRight: Radius.circular(25),
+            bottomLeft: Radius.circular(25),
+          ),
+        ),
+        toolbarHeight: 40,
+        elevation: 5.00,
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _blogPosts.isEmpty
@@ -76,32 +91,53 @@ class _BlogPageState extends State<BlogPage> {
               itemBuilder: (context, index) {
                 final post = _blogPosts[index];
                 return Card(
-                  margin: const EdgeInsets.all(8.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  elevation: 20.0,
-                  shadowColor: Colors.blue.shade100,
-                  clipBehavior: Clip.antiAlias,
-                  child: Column(
-                    children: [
-                      ListTile(
-                        title: Text(post['title'] ?? 'No Title'),
-                        subtitle: Text(post['content'] ?? 'No Content'),
-                        tileColor: Colors.blue.shade300,
+                      margin: const EdgeInsets.all(8.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      Image.network(
-                        post['imageUrl'] ?? 'https://via.placeholder.com/150',
-                        height: 150,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        isAntiAlias: true,
+                      elevation: 20.0,
+                      shadowColor: Colors.blue.shade100,
+                      clipBehavior: Clip.antiAlias,
+                      child: InkWell( // Use InkWell for tap detection
+                        onTap: () {
+                          // Navigate to BlogDetailPage, passing the blog ID
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BlogDetailPage(
+                                blogId: post['id'], // Pass the blog ID
+                              ),
+                            ),
+                          );
+                        },
+                        child: Column(
+                          children: [
+                            ListTile(
+                              title: Text(post['title'] ?? 'No Title'),
+                              subtitle: Text(
+                                // Limiting subtitle content for preview
+                                (post['content'] ?? 'No Content').replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '').substring(
+                                  0,
+                                  (post['content'] ?? 'No Content').replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '').length > 100
+                                      ? 100
+                                      : (post['content'] ?? 'No Content').replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '').length,
+                                ) + '...',
+                              ),
+                              tileColor: Colors.blue.shade300,
+                            ),
+                            Image.network(
+                              post['imageUrl'] ?? 'https://via.placeholder.com/150',
+                              height: 150,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              isAntiAlias: true,
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                    );
+                  },
+                ),
     );
   }
 }
