@@ -37,8 +37,10 @@ dependencies:
   google_nav_bar: ^5.0.7
   http: ^1.2.1
   shared_preferences: ^2.0.0
-  carousel_slider: ^4.2.1 # Add this for the image carousel
+  carousel_slider: ^4.2.1 
   font_awesome_flutter: ^10.7.0
+  lottie: ^3.3.1
+  insta_image_viewer: ^1.0.4
 
 dev_dependencies:
   flutter_test:

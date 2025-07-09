@@ -2,8 +2,9 @@ import 'package:children_tracking_mobileapp/pages/blog.dart'; // Make sure this 
 import 'package:children_tracking_mobileapp/pages/home.dart';
 import 'package:children_tracking_mobileapp/pages/login.dart';
 import 'package:children_tracking_mobileapp/pages/settings.dart';
+import 'package:children_tracking_mobileapp/pages/child_page.dart';
 import 'package:flutter/material.dart';
-import 'package:google_nav_bar/google_nav_bar.dart'; // Import GNav here as well
+import 'package:google_nav_bar/google_nav_bar.dart';
 
 void main() => runApp(const MyApp());
 
@@ -32,9 +33,8 @@ class _RootPageState extends State<RootPage> {
   // List of pages to display
   final List<Widget> _pages = [
     const HomePage(), // Your existing HomePage content
-    const BlogPage(), // Your BlogPage
-    // Add other pages for Pregnancy and Settings here if they exist
-    const Center(child: Text('Pregnancy Page Content')),
+    const BlogPage(), 
+    const ChildPage(),
     const SettingsPage(),
   ];
 
@@ -85,8 +85,8 @@ class _RootPageState extends State<RootPage> {
                 text: 'Blogs',
               ),
               GButton(
-                icon: Icons.pregnant_woman,
-                text: 'Pregnancy',
+                icon: Icons.baby_changing_station_outlined,
+                text: 'Your Childs',
               ),
               GButton(
                 icon: Icons.settings,

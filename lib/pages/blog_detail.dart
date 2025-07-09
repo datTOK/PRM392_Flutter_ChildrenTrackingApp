@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:insta_image_viewer/insta_image_viewer.dart';
 
 class BlogDetailPage extends StatefulWidget {
   final String blogId; 
@@ -92,14 +93,17 @@ class _BlogDetailPageState extends State<BlogDetailPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (_blogPost!['imageUrl'] != null)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 16.0),
-                              child: Image.network(
-                                _blogPost!['imageUrl'],
-                                width: double.infinity,
-                                height: 200,
-                                fit: BoxFit.cover,
-                                isAntiAlias: true,
+                            InstaImageViewer(
+                              child: Padding(
+                                padding: const EdgeInsets.only(bottom: 16.0),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  child: Image.network(
+                                    _blogPost!['imageUrl'],
+                                    width: double.infinity,
+                                    isAntiAlias: true,
+                                  ),
+                                ),
                               ),
                             ),
                           Text(
@@ -142,10 +146,12 @@ class _BlogDetailPageState extends State<BlogDetailPage> {
                                   ),
                                   itemCount: _blogPost!['contentImageUrls'].length,
                                   itemBuilder: (context, index) {
-                                    return Image.network(
-                                      _blogPost!['contentImageUrls'][index],
-                                      fit: BoxFit.cover,
-                                      isAntiAlias: true,
+                                    return InstaImageViewer(
+                                      child: Image.network(
+                                        _blogPost!['contentImageUrls'][index],
+                                        fit: BoxFit.cover,
+                                        isAntiAlias: true,
+                                      ),
                                     );
                                   },
                                 ),

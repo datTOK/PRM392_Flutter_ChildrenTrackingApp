@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart'; 
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:lottie/lottie.dart';
+import 'package:children_tracking_mobileapp/pages/add_child_page.dart'; 
+import 'package:children_tracking_mobileapp/pages/child_page.dart'; 
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -39,7 +42,7 @@ class _HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Hello, Parent!', 
+                      'Hello, Parent!',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -58,6 +61,19 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
           ),
+
+          Center(
+            // Center the Lottie animation
+            child: Lottie.network(
+              'https://lottie.host/af600d14-bfcd-4e0e-a582-9405a1071cc9/2EbAObm1Uz.json', // Example Lottie URL
+              height: 250, // Adjust height as needed
+              repeat: true, // Loop the animation
+              reverse: false,
+              animate: true,
+              frameRate: FrameRate.max,
+            ),
+          ),
+          const SizedBox(height: 30),
 
           // Quick Actions Section
           const Padding(
@@ -79,11 +95,43 @@ class _HomePageState extends State<HomePage> {
                 return Column(
                   children: [
                     InkWell(
-                      onTap: () {
-                        // TODO: Implement action when button is pressed
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Quick action: ${action['name']}')),
-                        );
+                      onTap: () async {
+                        // Implement specific actions based on the name
+                        if (action['name'] == 'Add Child') {
+                          // Navigate to AddChildPage
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const AddChildPage()),
+                          );
+                          // If AddChildPage returns true (child added successfully)
+                          // you might want to switch to the "Your Children" tab
+                          if (result == true) {
+                            // This assumes RootPage has a method to change the selected index
+                            // If RootPage is in main.dart, you might need a different approach
+                            // For now, we can just show a snackbar or let the user manually navigate
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Child added successfully!')),
+                            );
+
+                            // OPTIONAL: If you want to automatically switch to the ChildPage tab
+                            // This requires access to the RootPage's state, which is more complex.
+                            // A simpler approach is to use a callback or just let the user navigate.
+                            // For a quick fix, let's just make sure ChildPage refreshes when it's viewed again.
+                            // The ChildPage already has logic to refresh on initState when it loads.
+                          }
+                        } else if (action['name'] == 'Track Growth') {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Navigating to Track Growth')),
+                          );
+                        } else if (action['name'] == 'Emergency') {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Opening Emergency Contacts')),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Quick action: ${action['name']}')),
+                          );
+                        }
                       },
                       customBorder: const CircleBorder(),
                       child: CircleAvatar(
@@ -142,6 +190,7 @@ class _HomePageState extends State<HomePage> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Tapped on ${category['name']}')),
                       );
+                      // TODO: Implement navigation to category specific page or content
                     },
                     borderRadius: BorderRadius.circular(15),
                     child: Column(
@@ -169,7 +218,7 @@ class _HomePageState extends State<HomePage> {
               },
             ),
           ),
-          const SizedBox(height: 20), 
+          const SizedBox(height: 20),
         ],
       ),
     );
