@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:children_tracking_mobileapp/pages/blog_detail.dart'; 
+import 'package:children_tracking_mobileapp/pages/blog_detail.dart';
+import 'package:lottie/lottie.dart'; 
 
 class BlogPage extends StatefulWidget {
   const BlogPage({super.key});
@@ -69,7 +70,24 @@ class _BlogPageState extends State<BlogPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Blog Posts'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min, 
+          children: [
+            const Text(
+              'Blog Posts',
+              style: TextStyle(color: Colors.white),
+            ),
+            const SizedBox(width: 5), 
+            Lottie.network(
+              'https://lottie.host/13656411-0ba0-4803-a4a3-c210c69e6830/Do97hU6owW.json', 
+              height: 60, 
+              width: 40, 
+              repeat: true,
+              animate: true,
+              reverse: true
+            ),
+          ],
+        ),
         centerTitle: true,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
@@ -77,7 +95,7 @@ class _BlogPageState extends State<BlogPage> {
             bottomLeft: Radius.circular(25),
           ),
         ),
-        toolbarHeight: 40,
+        toolbarHeight: 60, 
         elevation: 5.00,
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
