@@ -1,5 +1,7 @@
+import 'package:children_tracking_mobileapp/pages/child_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:lottie/lottie.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart'; // Import SharedPreferences
 import 'package:children_tracking_mobileapp/pages/add_child_page.dart';
@@ -171,9 +173,32 @@ class _ChildPageState extends State<ChildPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Children'),
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        title: Row(
+          mainAxisSize: MainAxisSize.min, 
+          children: [
+            const Text(
+              'Your Children',
+            ),
+            const SizedBox(width: 5), 
+            Lottie.network(
+              'https://lottie.host/13656411-0ba0-4803-a4a3-c210c69e6830/Do97hU6owW.json', 
+              height: 60, 
+              width: 40, 
+              repeat: true,
+              animate: true,
+              reverse: true
+            ),
+          ],
+        ),
+        centerTitle: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomRight: Radius.circular(25),
+            bottomLeft: Radius.circular(25),
+          ),
+        ),
+        toolbarHeight: 60, 
+        elevation: 5.00,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -220,35 +245,45 @@ class _ChildPageState extends State<ChildPage> {
                       itemCount: _children.length,
                       itemBuilder: (context, index) {
                         final child = _children[index];
-                        return Card(
-                          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          elevation: 3,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  child.name,
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ChildDetailPage(childId: child.id),
+                              ),
+                            );
+                          },
+                          child: Card(
+                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    child.name,
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text('Birth Date: ${child.birthDate.toLocal().toString().split(' ')[0]}'),
-                                Text('Gender: ${_getGenderString(child.gender)}'),
-                                Text('Feeding Type: ${_getFeedingTypeString(child.feedingType)}'),
-                                Text('Allergies: ${_getAllergiesString(child.allergies)}'),
-                                if (child.note.isNotEmpty && child.note != 'N/A') // Check for 'N/A' as well
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 8.0),
-                                    child: Text('Note: ${child.note}', style: const TextStyle(fontStyle: FontStyle.italic)),
-                                  ),
-                              ],
+                                  const SizedBox(height: 8),
+                                  Text('Birth Date: ${child.birthDate.toLocal().toString().split(' ')[0]}'),
+                                  Text('Gender: ${_getGenderString(child.gender)}'),
+                                  Text('Feeding Type: ${_getFeedingTypeString(child.feedingType)}'),
+                                  Text('Allergies: ${_getAllergiesString(child.allergies)}'),
+                                  if (child.note.isNotEmpty && child.note != 'N/A') // Check for 'N/A' as well
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 8.0),
+                                      child: Text('Note: ${child.note}', style: const TextStyle(fontStyle: FontStyle.italic)),
+                                    ),
+                                ],
+                              ),
                             ),
                           ),
                         );

@@ -78,8 +78,6 @@ class _BlogDetailPageState extends State<BlogDetailPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_blogPost?['title'] ?? 'Blog Detail'),
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())

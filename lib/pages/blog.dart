@@ -75,7 +75,6 @@ class _BlogPageState extends State<BlogPage> {
           children: [
             const Text(
               'Blog Posts',
-              style: TextStyle(color: Colors.white),
             ),
             const SizedBox(width: 5), 
             Lottie.network(
@@ -97,8 +96,6 @@ class _BlogPageState extends State<BlogPage> {
         ),
         toolbarHeight: 60, 
         elevation: 5.00,
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -116,14 +113,13 @@ class _BlogPageState extends State<BlogPage> {
                       elevation: 20.0,
                       shadowColor: Colors.blue.shade100,
                       clipBehavior: Clip.antiAlias,
-                      child: InkWell( // Use InkWell for tap detection
+                      child: InkWell(
                         onTap: () {
-                          // Navigate to BlogDetailPage, passing the blog ID
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => BlogDetailPage(
-                                blogId: post['id'], // Pass the blog ID
+                                blogId: post['id'], 
                               ),
                             ),
                           );

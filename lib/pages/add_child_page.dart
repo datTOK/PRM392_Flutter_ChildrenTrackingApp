@@ -181,8 +181,6 @@ class _AddChildPageState extends State<AddChildPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Child'),
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -309,9 +307,7 @@ class _AddChildPageState extends State<AddChildPage> {
                   ? const Center(child: CircularProgressIndicator())
                   : ElevatedButton(
                       onPressed: _addChild,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        foregroundColor: Colors.white,
+                      style: ElevatedButton.styleFrom(                       
                         padding: const EdgeInsets.symmetric(vertical: 15),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
