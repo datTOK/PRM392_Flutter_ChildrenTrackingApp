@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:lottie/lottie.dart';
-import 'package:children_tracking_mobileapp/pages/add_child_page.dart'; 
-import 'package:children_tracking_mobileapp/pages/child_page.dart'; 
+import 'package:children_tracking_mobileapp/pages/add_child_page.dart';
+import 'package:provider/provider.dart'; 
+import 'package:children_tracking_mobileapp/provider/theme_provider.dart'; 
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,8 +15,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final List<Map<String, dynamic>> _quickActions = [
     {'name': 'Add Child', 'icon': Icons.child_care, 'color': Colors.lightBlue},
-    {'name': 'Track Growth', 'icon': Icons.show_chart, 'color': Colors.green},
-    {'name': 'Emergency', 'icon': Icons.emergency, 'color': Colors.red},
+    {'name': 'Toggle Theme', 'icon': Icons.brightness_6, 'color': Colors.red},
   ];
 
   final List<Map<String, dynamic>> _categories = [
@@ -29,13 +29,17 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false); 
+
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             padding: const EdgeInsets.all(20.0),
-            color: Colors.blue.shade800,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white 
+                : Colors.blue.shade800, 
             child: const Row(
               children: [
                 Column(
@@ -46,14 +50,14 @@ class _HomePageState extends State<HomePage> {
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: Colors.black
                       ),
                     ),
                     Text(
                       'Welcome back to your child\'s journey.',
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.white70,
+                        color: Colors.black
                       ),
                     ),
                   ],
@@ -63,11 +67,10 @@ class _HomePageState extends State<HomePage> {
           ),
 
           Center(
-            // Center the Lottie animation
             child: Lottie.network(
-              'https://lottie.host/af600d14-bfcd-4e0e-a582-9405a1071cc9/2EbAObm1Uz.json', // Example Lottie URL
-              height: 250, // Adjust height as needed
-              repeat: true, // Loop the animation
+              'https://lottie.host/af600d14-bfcd-4e0e-a582-9405a1071cc9/2EbAObm1Uz.json',
+              height: 250,
+              repeat: true,
               reverse: false,
               animate: true,
               frameRate: FrameRate.max,
@@ -76,15 +79,11 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: 30),
 
           // Quick Actions Section
-          const Padding(
-            padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 10.0),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 10.0),
             child: Text(
               'Quick Actions',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
           Padding(
@@ -96,36 +95,20 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     InkWell(
                       onTap: () async {
-                        // Implement specific actions based on the name
                         if (action['name'] == 'Add Child') {
-                          // Navigate to AddChildPage
                           final result = await Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => const AddChildPage()),
                           );
-                          // If AddChildPage returns true (child added successfully)
-                          // you might want to switch to the "Your Children" tab
                           if (result == true) {
-                            // This assumes RootPage has a method to change the selected index
-                            // If RootPage is in main.dart, you might need a different approach
-                            // For now, we can just show a snackbar or let the user manually navigate
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('Child added successfully!')),
                             );
-
-                            // OPTIONAL: If you want to automatically switch to the ChildPage tab
-                            // This requires access to the RootPage's state, which is more complex.
-                            // A simpler approach is to use a callback or just let the user navigate.
-                            // For a quick fix, let's just make sure ChildPage refreshes when it's viewed again.
-                            // The ChildPage already has logic to refresh on initState when it loads.
                           }
-                        } else if (action['name'] == 'Track Growth') {
+                        } else if (action['name'] == 'Toggle Theme') {
+                          themeProvider.toggleTheme(); 
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Navigating to Track Growth')),
-                          );
-                        } else if (action['name'] == 'Emergency') {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Opening Emergency Contacts')),
+                            SnackBar(content: Text('Toggled theme to ${themeProvider.themeMode.name}')),
                           );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -147,7 +130,7 @@ class _HomePageState extends State<HomePage> {
                     const SizedBox(height: 8),
                     Text(
                       action['name'],
-                      style: const TextStyle(fontSize: 14, color: Colors.black87),
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ],
                 );
@@ -155,15 +138,11 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          const Padding(
-            padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0),
             child: Text(
               'Explore Categories',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
           Padding(
@@ -185,12 +164,12 @@ class _HomePageState extends State<HomePage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
+                  color: Theme.of(context).cardTheme.color, 
                   child: InkWell(
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Tapped on ${category['name']}')),
                       );
-                      // TODO: Implement navigation to category specific page or content
                     },
                     borderRadius: BorderRadius.circular(15),
                     child: Column(
@@ -205,10 +184,8 @@ class _HomePageState extends State<HomePage> {
                         Text(
                           category['name'],
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 16,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: Colors.black87,
                           ),
                         ),
                       ],
