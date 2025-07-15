@@ -36,7 +36,7 @@ class _BlogPageState extends State<BlogPage> {
       _isLoading = true;
     });
 
-    final String apiUrl = 'https://child-tracking-dotnet.onrender.com/api/Blog';
+    final String apiUrl = 'https://restapi-dy71.onrender.com/api/Blog';
 
     try {
       final response = await http.get(

@@ -39,7 +39,7 @@ class _BlogDetailPageState extends State<BlogDetailPage> {
       _errorMessage = '';
     });
 
-    final String apiUrl = 'https://child-tracking-dotnet.onrender.com/api/Blog/${widget.blogId}';
+    final String apiUrl = 'https://restapi-dy71.onrender.com/api/Blog/${widget.blogId}';
 
     try {
       final response = await http.get(
