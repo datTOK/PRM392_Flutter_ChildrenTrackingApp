@@ -95,7 +95,7 @@ class _ChildPageState extends State<ChildPage> {
       return;
     }
 
-    final url = Uri.parse('https://child-tracking-dotnet.onrender.com/api/Child/user/$_userId');
+    final url = Uri.parse('https://restapi-dy71.onrender.com/api/Child/user/$_userId');
     try {
       final response = await http.get(
         url,

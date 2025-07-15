@@ -75,7 +75,7 @@ class _ChildDetailPageState extends State<ChildDetailPage> {
       return;
     }
 
-    final url = Uri.parse('https://child-tracking-dotnet.onrender.com/api/Child/${widget.childId}');
+    final url = Uri.parse('https://restapi-dy71.onrender.com/api/Child/${widget.childId}');
 
     try {
       final response = await http.get(
@@ -129,7 +129,7 @@ class _ChildDetailPageState extends State<ChildDetailPage> {
         return;
       }
 
-      final url = Uri.parse('https://child-tracking-dotnet.onrender.com/api/GrowthData?childId=${widget.childId}');
+      final url = Uri.parse('https://restapi-dy71.onrender.com/api/GrowthData?childId=${widget.childId}');
 
       try {
         final response = await http.post(

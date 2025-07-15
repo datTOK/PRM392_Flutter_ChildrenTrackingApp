@@ -59,7 +59,7 @@ class _ChildGrowthDataPageState extends State<ChildGrowthDataPage> {
       return;
     }
 
-    final url = Uri.parse('https://child-tracking-dotnet.onrender.com/api/GrowthData/child/${widget.childId}');
+    final url = Uri.parse('https://restapi-dy71.onrender.com/api/GrowthData/child/${widget.childId}');
 
     try {
       final response = await http.get(

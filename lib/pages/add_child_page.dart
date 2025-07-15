@@ -123,7 +123,7 @@ class _AddChildPageState extends State<AddChildPage> {
       final List<int> allergies = _selectedAllergies;
 
       // Correct API URL
-      final url = Uri.parse('https://child-tracking-dotnet.onrender.com/api/Child');
+      final url = Uri.parse('https://restapi-dy71.onrender.com/api/Child');
 
       try {
         final response = await http.post(

@@ -41,7 +41,7 @@ class _SettingsPageState extends State<SettingsPage> {
       return;
     }
 
-    final String apiUrl = 'https://child-tracking-dotnet.onrender.com/api/Auth/me';
+    final String apiUrl = 'https://restapi-dy71.onrender.com/api/Auth/me';
 
     try {
       final response = await http.get(
