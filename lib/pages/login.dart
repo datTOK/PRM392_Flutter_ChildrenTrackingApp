@@ -41,7 +41,9 @@ class _LoginPageState extends State<LoginPage> {
       if (parts.length != 3) {
         return null; // Not a valid JWT format
       }
-      final payload = utf8.decode(base64Url.decode(base64Url.normalize(parts[1])));
+      final payload = utf8.decode(
+        base64Url.decode(base64Url.normalize(parts[1])),
+      );
       return json.decode(payload);
     } catch (e) {
       print('Error decoding JWT: $e');
@@ -77,7 +79,9 @@ class _LoginPageState extends State<LoginPage> {
         if (accessToken != null) {
           // Decode the access token to get user ID
           final Map<String, dynamic>? jwtPayload = _decodeJwt(accessToken);
-          final String? userId = jwtPayload?['userId']; // Extract userId from payload
+          final String? userId =
+              jwtPayload?['userId']; // Extract userId from payload
+          print('[DEBUG] Login userId: $userId');
 
           if (userId != null) {
             // Save both the access token and user ID
@@ -98,7 +102,9 @@ class _LoginPageState extends State<LoginPage> {
           _showSnackBar('Login failed: Access token not found.');
         }
       } else {
-        _showSnackBar('Login failed: ${response.reasonPhrase ?? 'Unknown error'}');
+        _showSnackBar(
+          'Login failed: ${response.reasonPhrase ?? 'Unknown error'}',
+        );
       }
     } catch (e) {
       _showSnackBar('Error during login: $e');
@@ -156,9 +162,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 30),
               _isLoading
-                  ? const CircularProgressIndicator(
-                      color: Colors.black,
-                    )
+                  ? const CircularProgressIndicator(color: Colors.black)
                   : ElevatedButton(
                       onPressed: _login,
                       style: ElevatedButton.styleFrom(
