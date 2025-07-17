@@ -302,9 +302,9 @@ class _RequestCard extends StatelessWidget {
     return ListTile(
       leading: const Icon(Icons.request_page, color: Colors.blue),
       title: Text(
-        'Doctor: ${item['doctor']?['name'] ?? item['doctorId'] ?? 'N/A'}',
+        'Doctor: ${item['doctor']?['name']?.toString() ?? item['doctorId']?.toString() ?? 'N/A'}',
       ),
-      subtitle: Text('Status: ${item['status'] ?? ''}'),
+      subtitle: Text('Status: ${statusText(item['status'])}'),
       trailing: IconButton(
         icon: const Icon(Icons.arrow_forward_ios),
         onPressed: () {
@@ -330,10 +330,10 @@ class _ConsultantCard extends StatelessWidget {
     return ListTile(
       leading: const Icon(Icons.medical_services, color: Colors.green),
       title: Text(
-        'Doctor: ${item['doctor']?['name'] ?? item['doctorId'] ?? 'N/A'}',
+        'Doctor: ${item['doctor']?['name']?.toString() ?? item['doctorId']?.toString() ?? 'N/A'}',
       ),
       subtitle: Text(
-        'Status: ${item['status'] ?? ''}\nCreated: ${item['createdAt'] ?? ''}',
+        'Status: ${consultantStatusText(item['status'])}\nCreated: ${item['createdAt']?.toString() ?? ''}',
       ),
       trailing: IconButton(
         icon: const Icon(Icons.arrow_forward_ios),
@@ -348,6 +348,41 @@ class _ConsultantCard extends StatelessWidget {
         },
       ),
     );
+  }
+}
+
+String statusText(dynamic status) {
+  switch (status) {
+    case 0:
+    case '0':
+      return 'Pending';
+    case 1:
+    case '1':
+      return 'Admin_Rejected';
+    case 2:
+    case '2':
+      return 'Admin_Accepted';
+    case 3:
+    case '3':
+      return 'Doctor_Accepted';
+    case 4:
+    case '4':
+      return 'Doctor_Rejected';
+    default:
+      return status?.toString() ?? '';
+  }
+}
+
+String consultantStatusText(dynamic status) {
+  switch (status) {
+    case 0:
+    case '0':
+      return 'Ongoing';
+    case 1:
+    case '1':
+      return 'Completed';
+    default:
+      return status?.toString() ?? '';
   }
 }
 
