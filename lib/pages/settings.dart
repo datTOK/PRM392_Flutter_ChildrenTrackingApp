@@ -109,6 +109,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false, 
         title: Row(
           mainAxisSize: MainAxisSize.min, 
           children: [

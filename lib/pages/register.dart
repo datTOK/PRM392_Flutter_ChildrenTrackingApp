@@ -1,27 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:lottie/lottie.dart';
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:children_tracking_mobileapp/main.dart'; 
-import 'package:children_tracking_mobileapp/pages/register.dart';
+import 'package:lottie/lottie.dart';
+import 'package:children_tracking_mobileapp/pages/login.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -35,29 +37,19 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Map<String, dynamic>? _decodeJwt(String token) {
-    try {
-      final parts = token.split('.');
-      if (parts.length != 3) {
-        return null; // Not a valid JWT format
-      }
-      final payload = utf8.decode(
-        base64Url.decode(base64Url.normalize(parts[1])),
-      );
-      return json.decode(payload);
-    } catch (e) {
-      print('Error decoding JWT: $e');
-      return null;
+  Future<void> _register() async {
+    if (_passwordController.text != _confirmPasswordController.text) {
+      _showSnackBar('Passwords do not match.');
+      return;
     }
-  }
 
-  Future<void> _login() async {
     setState(() {
       _isLoading = true;
     });
 
-    final String apiUrl = 'https://restapi-dy71.onrender.com/api/Auth/login';
-    final Map<String, String> data = {
+    final String apiUrl = 'https://restapi-dy71.onrender.com/api/Auth/register'; 
+    final Map<String, dynamic> data = {
+      'name': _nameController.text,
       'email': _emailController.text,
       'password': _passwordController.text,
     };
@@ -72,42 +64,25 @@ class _LoginPageState extends State<LoginPage> {
         body: jsonEncode(data),
       );
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = jsonDecode(response.body);
-        final String? accessToken = responseData['accessToken'];
-
-        if (accessToken != null) {
-          // Decode the access token to get user ID
-          final Map<String, dynamic>? jwtPayload = _decodeJwt(accessToken);
-          final String? userId =
-              jwtPayload?['userId']; // Extract userId from payload
-          print('[DEBUG] Login userId: $userId');
-
-          if (userId != null) {
-            // Save both the access token and user ID
-            SharedPreferences prefs = await SharedPreferences.getInstance();
-            await prefs.setString('accessToken', accessToken);
-            await prefs.setString('userId', userId); // Save userId
-
-            _showSnackBar('Login successful!', backgroundColor: Colors.green);
-            // Navigate to RootPage (your main app content)
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const RootPage()),
-            );
-          } else {
-            _showSnackBar('Login failed: User ID not found in token.');
-          }
-        } else {
-          _showSnackBar('Login failed: Access token not found.');
-        }
-      } else {
-        _showSnackBar(
-          'Login failed: ${response.reasonPhrase ?? 'Unknown error'}',
+      if (response.statusCode == 201 || response.statusCode == 200) { 
+        _showSnackBar('Registration successful! Please log in.',
+            backgroundColor: Colors.green);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
         );
+      } else {
+        String errorMessage = 'Registration failed: Unknown error';
+        try {
+          final Map<String, dynamic> errorData = jsonDecode(response.body);
+          errorMessage = 'Registration failed: ${errorData['message'] ?? 'Unknown error'}';
+        } catch (e) {
+          errorMessage = 'Registration failed: ${response.reasonPhrase ?? 'Unknown error'} (Status Code: ${response.statusCode})';
+        }
+        _showSnackBar(errorMessage);
       }
     } catch (e) {
-      _showSnackBar('Error during login: $e');
+      _showSnackBar('Error during registration: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -119,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login', style: TextStyle(color: Colors.white)),
+        title: const Text('Register', style: TextStyle(color: Colors.white)),
         centerTitle: true,
         backgroundColor: Colors.black,
         automaticallyImplyLeading: false, 
@@ -132,12 +107,23 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               Lottie.network(
                 'https://lottie.host/1ce27522-55ba-4f73-a824-4c2dc116d2c9/q97IkZp70L.json',
-                height: 200,
+                height: 150,
                 repeat: true,
                 reverse: false,
                 animate: true,
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                  labelText: 'Name',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  prefixIcon: const Icon(Icons.person),
+                ),
+              ),
+              const SizedBox(height: 20),
               TextField(
                 controller: _emailController,
                 decoration: InputDecoration(
@@ -161,11 +147,23 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 obscureText: true,
               ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _confirmPasswordController,
+                decoration: InputDecoration(
+                  labelText: 'Confirm Password',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  prefixIcon: const Icon(Icons.lock),
+                ),
+                obscureText: true,
+              ),
               const SizedBox(height: 30),
               _isLoading
                   ? const CircularProgressIndicator(color: Colors.black)
                   : ElevatedButton(
-                      onPressed: _login,
+                      onPressed: _register,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black,
                         foregroundColor: Colors.white,
@@ -179,20 +177,20 @@ class _LoginPageState extends State<LoginPage> {
                         elevation: 5,
                       ),
                       child: const Text(
-                        'Login',
+                        'Register',
                         style: TextStyle(fontSize: 18),
                       ),
                     ),
-                    const SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextButton(
                 onPressed: () {
-                  Navigator.push(
+                  Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const RegisterPage()),
+                    MaterialPageRoute(builder: (context) => const LoginPage()),
                   );
                 },
                 child: Text(
-                  'Don\'t have an account? Register now',
+                  'Already have an account? Login',
                   style: TextStyle(
                     color: Theme.of(context).primaryColor,
                     decoration: TextDecoration.underline,

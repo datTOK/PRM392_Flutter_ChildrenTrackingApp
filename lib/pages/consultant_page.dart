@@ -111,7 +111,7 @@ class _ConsultantPageState extends State<ConsultantPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Consultant'), centerTitle: true),
+      appBar: AppBar(title: const Text('Consultant'), centerTitle: true, automaticallyImplyLeading: false),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),

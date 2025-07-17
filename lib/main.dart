@@ -115,12 +115,12 @@ class _RootPageState extends State<RootPage> {
             Theme.of(context).bottomNavigationBarTheme.backgroundColor ??
             Colors.black,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           child: GNav(
             backgroundColor:
                 Theme.of(context).bottomNavigationBarTheme.backgroundColor ??
                 Colors.black,
-            gap: 8,
+            gap: 4,
             color: Theme.of(context).brightness == Brightness.dark
                 ? Colors.white
                 : Colors.white,
@@ -141,11 +141,11 @@ class _RootPageState extends State<RootPage> {
               GButton(icon: Icons.book, text: 'Blogs'),
               GButton(
                 icon: Icons.baby_changing_station_outlined,
-                text: 'Your Childs',
+                text: 'Childs',
               ),
               GButton(
                 icon: Icons.medical_services, // Consultant tab before Settings
-                text: 'Consultant',
+                text: 'Consult',
               ),
               GButton(icon: Icons.settings, text: 'Settings'),
             ],
