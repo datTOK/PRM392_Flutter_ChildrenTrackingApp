@@ -173,6 +173,7 @@ class _ChildPageState extends State<ChildPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false, 
         title: Row(
           mainAxisSize: MainAxisSize.min, 
           children: [
