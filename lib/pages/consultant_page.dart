@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:children_tracking_mobileapp/pages/request_detail_page.dart';
 import 'package:children_tracking_mobileapp/pages/consultant_detail_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:children_tracking_mobileapp/pages/doctor_selection_page.dart';
 
 class ConsultantPage extends StatefulWidget {
   const ConsultantPage({Key? key}) : super(key: key);
@@ -383,18 +384,5 @@ String consultantStatusText(dynamic status) {
       return 'Completed';
     default:
       return status?.toString() ?? '';
-  }
-}
-
-// Placeholder for doctor selection page
-class DoctorSelectionPage extends StatelessWidget {
-  const DoctorSelectionPage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Select a Doctor')),
-      body: const Center(child: Text('Doctor list will be shown here.')),
-    );
   }
 }

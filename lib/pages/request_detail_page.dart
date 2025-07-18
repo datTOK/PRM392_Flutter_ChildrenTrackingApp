@@ -41,7 +41,7 @@ class _RequestDetailPageState extends State<RequestDetailPage> {
     setState(() => _loading = true);
     try {
       final url =
-          'https://restapi-dy71.onrender.com/api/Request/member/$_memberId?id=${widget.requestId}';
+          'https://restapi-dy71.onrender.com/api/Request/member/$_memberId';
       final response = await http.get(
         Uri.parse(url),
         headers: {
@@ -51,10 +51,12 @@ class _RequestDetailPageState extends State<RequestDetailPage> {
       );
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
+        final List data = decoded['data'] ?? [];
         setState(() {
-          _request = (decoded['data'] as List?)?.isNotEmpty == true
-              ? decoded['data'][0]
-              : null;
+          _request = data.firstWhere(
+            (req) => req['id'] == widget.requestId,
+            orElse: () => null,
+          );
         });
       }
     } catch (e) {

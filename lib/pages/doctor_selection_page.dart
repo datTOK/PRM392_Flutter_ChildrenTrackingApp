@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DoctorSelectionPage extends StatefulWidget {
   const DoctorSelectionPage({Key? key}) : super(key: key);
@@ -14,11 +15,24 @@ class _DoctorSelectionPageState extends State<DoctorSelectionPage> {
   List<dynamic> _filteredDoctors = [];
   bool _loading = false;
   String _search = '';
+  String? _accessToken;
+  List<dynamic> _children = [];
+  String? _selectedChildId;
+  String _message = '';
+  String? _userId;
 
   @override
   void initState() {
     super.initState();
+    _loadTokenAndFetchDoctors();
+  }
+
+  Future<void> _loadTokenAndFetchDoctors() async {
+    final prefs = await SharedPreferences.getInstance();
+    _accessToken = prefs.getString('accessToken');
+    _userId = prefs.getString('userId');
     _fetchDoctors();
+    _fetchChildren();
   }
 
   Future<void> _fetchDoctors() async {
@@ -26,7 +40,12 @@ class _DoctorSelectionPageState extends State<DoctorSelectionPage> {
     try {
       final response = await http.get(
         Uri.parse('https://restapi-dy71.onrender.com/api/User/doctors'),
+        headers: {
+          if (_accessToken != null) 'Authorization': 'Bearer $_accessToken',
+          'accept': '*/*',
+        },
       );
+      print('[DEBUG] Doctor API response: ${response.body}');
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body);
         print('[DEBUG] Doctor data: ' + decoded.toString());
@@ -42,6 +61,27 @@ class _DoctorSelectionPageState extends State<DoctorSelectionPage> {
     }
   }
 
+  Future<void> _fetchChildren() async {
+    if (_userId == null) return;
+    try {
+      final response = await http.get(
+        Uri.parse('https://restapi-dy71.onrender.com/api/Child/user/$_userId'),
+        headers: {
+          if (_accessToken != null) 'Authorization': 'Bearer $_accessToken',
+          'accept': '*/*',
+        },
+      );
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        setState(() {
+          _children = decoded['data'] ?? [];
+        });
+      }
+    } catch (e) {
+      // Handle error
+    }
+  }
+
   void _onSearchChanged(String value) {
     setState(() {
       _search = value;
@@ -50,6 +90,135 @@ class _DoctorSelectionPageState extends State<DoctorSelectionPage> {
         return name.contains(_search.toLowerCase());
       }).toList();
     });
+  }
+
+  void _showRequestConsultantSheet(
+    BuildContext context,
+    String doctorId,
+    String doctorName,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 20,
+            right: 20,
+            top: 24,
+          ),
+          child: StatefulBuilder(
+            builder: (context, setModalState) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Request Consultant for Dr. $doctorName',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    value: _selectedChildId,
+                    items: _children.map<DropdownMenuItem<String>>((child) {
+                      return DropdownMenuItem<String>(
+                        value: child['id']?.toString(),
+                        child: Text(child['name']?.toString() ?? ''),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setModalState(() => _selectedChildId = value);
+                    },
+                    decoration: const InputDecoration(
+                      labelText: 'Select Child',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    minLines: 3,
+                    maxLines: 5,
+                    decoration: const InputDecoration(
+                      labelText: 'Message to doctor',
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (value) {
+                      setModalState(() => _message = value);
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _sendConsultantRequest(context, doctorId);
+                      },
+                      child: const Text('Send Request'),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _sendConsultantRequest(
+    BuildContext context,
+    String doctorId,
+  ) async {
+    if (_selectedChildId == null || _message.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a child and enter a message.'),
+        ),
+      );
+      return;
+    }
+    final requestBody = {
+      'childId': _selectedChildId,
+      'doctorId': doctorId,
+      'message': _message,
+    };
+    print('[DEBUG] Sending request body: ' + requestBody.toString());
+    try {
+      final response = await http.post(
+        Uri.parse('https://restapi-dy71.onrender.com/api/Request'),
+        headers: {
+          if (_accessToken != null) 'Authorization': 'Bearer $_accessToken',
+          'accept': '*/*',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(requestBody),
+      );
+      print('[DEBUG] Status code: ${response.statusCode}');
+      print('[DEBUG] Response body: ${response.body}');
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Request sent successfully!')),
+        );
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to send request: ${response.body}')),
+        );
+      }
+    } catch (e) {
+      print('[DEBUG] Exception: $e');
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
   }
 
   Widget _buildStarRating(double rating) {
@@ -168,6 +337,30 @@ class _DoctorSelectionPageState extends State<DoctorSelectionPage> {
                               ),
                               const SizedBox(height: 10),
                               _buildStarRating(rating),
+                              const SizedBox(height: 10),
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton.icon(
+                                  icon: const Icon(Icons.add_comment),
+                                  label: const Text('Request Consultant'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blue,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        12,
+                                      ), // Slight roundness
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    _showRequestConsultantSheet(
+                                      context,
+                                      doctor['id']?.toString() ?? '',
+                                      doctor['name']?.toString() ?? '',
+                                    );
+                                  },
+                                ),
+                              ),
                             ],
                           ),
                         ),
