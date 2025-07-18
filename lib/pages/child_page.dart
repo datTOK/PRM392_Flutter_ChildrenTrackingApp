@@ -1,46 +1,10 @@
 import 'package:children_tracking_mobileapp/pages/child_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:lottie/lottie.dart';
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart'; // Import SharedPreferences
+import 'package:shared_preferences/shared_preferences.dart'; 
 import 'package:children_tracking_mobileapp/pages/add_child_page.dart';
-
-// Data model for a Child (based on your API response)
-class Child {
-  final String id;
-  final String name;
-  final DateTime birthDate;
-  final String note;
-  final int gender;
-  final int feedingType;
-  final List<int> allergies;
-  final String guardianId;
-
-  Child({
-    required this.id,
-    required this.name,
-    required this.birthDate,
-    required this.note,
-    required this.gender,
-    required this.feedingType,
-    required this.allergies,
-    required this.guardianId,
-  });
-
-  factory Child.fromJson(Map<String, dynamic> json) {
-    return Child(
-      id: json['id'],
-      name: json['name'],
-      birthDate: DateTime.parse(json['birthDate']),
-      note: json['note'] ?? 'N/A', // Handle potentially null note
-      gender: json['gender'],
-      feedingType: json['feedingType'],
-      allergies: List<int>.from(json['allergies'] ?? []),
-      guardianId: json['guardianId'],
-    );
-  }
-}
+import 'package:children_tracking_mobileapp/models/child_models.dart';
 
 class ChildPage extends StatefulWidget {
   const ChildPage({super.key});
@@ -181,14 +145,7 @@ class _ChildPageState extends State<ChildPage> {
               'Your Children',
             ),
             const SizedBox(width: 5), 
-            Lottie.network(
-              'https://lottie.host/13656411-0ba0-4803-a4a3-c210c69e6830/Do97hU6owW.json', 
-              height: 60, 
-              width: 40, 
-              repeat: true,
-              animate: true,
-              reverse: true
-            ),
+            Icon(Icons.child_care, size: 26),
           ],
         ),
         centerTitle: true,

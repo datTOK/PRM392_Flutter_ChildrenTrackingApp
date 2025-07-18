@@ -15,7 +15,8 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   bool _isLoading = false;
 
   @override
@@ -47,7 +48,7 @@ class _RegisterPageState extends State<RegisterPage> {
       _isLoading = true;
     });
 
-    final String apiUrl = 'https://restapi-dy71.onrender.com/api/Auth/register'; 
+    final String apiUrl = 'https://restapi-dy71.onrender.com/api/Auth/register';
     final Map<String, dynamic> data = {
       'name': _nameController.text,
       'email': _emailController.text,
@@ -64,9 +65,11 @@ class _RegisterPageState extends State<RegisterPage> {
         body: jsonEncode(data),
       );
 
-      if (response.statusCode == 201 || response.statusCode == 200) { 
-        _showSnackBar('Registration successful! Please log in.',
-            backgroundColor: Colors.green);
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        _showSnackBar(
+          'Registration successful! Please log in.',
+          backgroundColor: Colors.green,
+        );
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const LoginPage()),
@@ -75,9 +78,11 @@ class _RegisterPageState extends State<RegisterPage> {
         String errorMessage = 'Registration failed: Unknown error';
         try {
           final Map<String, dynamic> errorData = jsonDecode(response.body);
-          errorMessage = 'Registration failed: ${errorData['message'] ?? 'Unknown error'}';
+          errorMessage =
+              'Registration failed: ${errorData['message'] ?? 'Unknown error'}';
         } catch (e) {
-          errorMessage = 'Registration failed: ${response.reasonPhrase ?? 'Unknown error'} (Status Code: ${response.statusCode})';
+          errorMessage =
+              'Registration failed: ${response.reasonPhrase ?? 'Unknown error'} (Status Code: ${response.statusCode})';
         }
         _showSnackBar(errorMessage);
       }
@@ -94,10 +99,9 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Register', style: TextStyle(color: Colors.white)),
+        title: const Text('Register'),
         centerTitle: true,
-        backgroundColor: Colors.black,
-        automaticallyImplyLeading: false, 
+        automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -165,8 +169,6 @@ class _RegisterPageState extends State<RegisterPage> {
                   : ElevatedButton(
                       onPressed: _register,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 50,
                           vertical: 15,
@@ -182,6 +184,8 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
               const SizedBox(height: 20),
+              Divider(color: Colors.grey, height: 1, endIndent: 50, indent: 50),
+              const SizedBox(height: 20),
               TextButton(
                 onPressed: () {
                   Navigator.pushReplacement(
@@ -192,7 +196,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: Text(
                   'Already have an account? Login',
                   style: TextStyle(
-                    color: Theme.of(context).primaryColor,
+                    fontSize: 16,
                     decoration: TextDecoration.underline,
                   ),
                 ),
