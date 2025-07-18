@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:children_tracking_mobileapp/pages/child_page.dart';
 import 'package:children_tracking_mobileapp/pages/child_growth_data_page.dart'; 
+import 'package:children_tracking_mobileapp/models/child_models.dart';
 
 class ChildDetailPage extends StatefulWidget {
   final String childId;
@@ -315,7 +315,6 @@ class _ChildDetailPageState extends State<ChildDetailPage> {
                                       )
                                     ),
                                     const Divider(height: 30, thickness: 1),
-                                    _buildDetailRow('ID', _child!.id),
                                     _buildDetailRow('Birth Date', _child!.birthDate.toLocal().toString().split(' ')[0]),
                                     _buildDetailRow('Gender', _getGenderString(_child!.gender)),
                                     _buildDetailRow('Feeding Type', _getFeedingTypeString(_child!.feedingType)),

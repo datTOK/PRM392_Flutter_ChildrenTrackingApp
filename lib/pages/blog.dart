@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:children_tracking_mobileapp/pages/blog_detail.dart';
-import 'package:lottie/lottie.dart'; 
 
 class BlogPage extends StatefulWidget {
   const BlogPage({super.key});
@@ -78,14 +77,7 @@ class _BlogPageState extends State<BlogPage> {
               'Blog Posts',
             ),
             const SizedBox(width: 5), 
-            Lottie.network(
-              'https://lottie.host/13656411-0ba0-4803-a4a3-c210c69e6830/Do97hU6owW.json', 
-              height: 60, 
-              width: 40, 
-              repeat: true,
-              animate: true,
-              reverse: true
-            ),
+            Icon(Icons.library_books, size: 26),
           ],
         ),
         centerTitle: true,

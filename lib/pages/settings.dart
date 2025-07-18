@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:children_tracking_mobileapp/pages/login.dart';
-import 'package:lottie/lottie.dart';
-import 'package:shared_preferences/shared_preferences.dart'; 
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -49,23 +48,22 @@ class _SettingsPageState extends State<SettingsPage> {
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'accept': 'text/plain',
-          'Authorization': 'Bearer $accessToken', 
+          'Authorization': 'Bearer $accessToken',
         },
       );
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         setState(() {
-          _userProfile = responseData; 
+          _userProfile = responseData;
         });
       } else if (response.statusCode == 401) {
         setState(() {
           _profileErrorMessage = 'Unauthorized. Please log in again.';
         });
         _showSnackBar(_profileErrorMessage, backgroundColor: Colors.orange);
-        _logout(context); 
-      }
-      else {
+        _logout(context);
+      } else {
         setState(() {
           _profileErrorMessage = 'Failed to load profile: ${response.reasonPhrase}';
         });
@@ -95,7 +93,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   void _logout(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('accessToken'); 
+    await prefs.remove('accessToken');
     await prefs.remove('userId');
 
     Navigator.pushAndRemoveUntil(
@@ -109,21 +107,18 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false, 
-        title: Row(
-          mainAxisSize: MainAxisSize.min, 
+        automaticallyImplyLeading: false,
+        title: const Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            Text(
               'Settings',
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            const SizedBox(width: 5), 
-            Lottie.network(
-              'https://lottie.host/13656411-0ba0-4803-a4a3-c210c69e6830/Do97hU6owW.json', 
-              height: 60, 
-              width: 40, 
-              repeat: true,
-              animate: true,
-              reverse: true
+            SizedBox(width: 8),
+            Icon(
+              Icons.settings,
+              size: 28,
             ),
           ],
         ),
@@ -134,81 +129,159 @@ class _SettingsPageState extends State<SettingsPage> {
             bottomLeft: Radius.circular(25),
           ),
         ),
-        toolbarHeight: 60, 
-        elevation: 5.00,
+        toolbarHeight: 70,
+        elevation: 8.0,
       ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(20.0),
           child: _isLoadingProfile
-              ? const CircularProgressIndicator()
+              ? const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Loading profile...', style: TextStyle(fontSize: 16)),
+                  ],
+                )
               : _profileErrorMessage.isNotEmpty
                   ? Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(_profileErrorMessage, textAlign: TextAlign.center, style: const TextStyle(color: Colors.red, fontSize: 16)),
+                        Icon(Icons.error_outline, size: 60, color: Colors.redAccent),
                         const SizedBox(height: 20),
-                        ElevatedButton(
+                        Text(
+                          _profileErrorMessage,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.red, fontSize: 18, fontWeight: FontWeight.w500),
+                        ),
+                        const SizedBox(height: 30),
+                        ElevatedButton.icon(
                           onPressed: _fetchUserProfile,
-                          child: const Text('Retry Load Profile'),
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Retry Load Profile', style: TextStyle(fontSize: 16)),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            backgroundColor: Theme.of(context).primaryColor,
+                            foregroundColor: Colors.white,
+                          ),
                         ),
                         const SizedBox(height: 20),
-                        ElevatedButton(
+                        ElevatedButton.icon(
                           onPressed: () => _logout(context),
+                          icon: const Icon(Icons.logout),
+                          label: const Text('Logout', style: TextStyle(fontSize: 16)),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.redAccent,
                             foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 5,
                           ),
-                          child: const Text('Logout'),
                         ),
                       ],
                     )
                   : Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.settings, size: 80, color: Colors.blueGrey),
-                        const SizedBox(height: 20),
-                        const Text(
-                          'Manage your app settings here.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 20, fontStyle: FontStyle.italic, color: Colors.black87),
+                        const CircleAvatar(
+                          radius: 60,
+                          backgroundColor: Colors.blueGrey,
+                          child: Icon(Icons.person, size: 80, color: Colors.white),
                         ),
                         const SizedBox(height: 30),
-                        if (_userProfile != null) ...[
-                          Text(
-                            'Welcome, ${_userProfile!['name'] ?? 'User'}!',
-                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                        Text(
+                          'Welcome, ${_userProfile!['name'] ?? 'User'}!',
+                          style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).textTheme.headlineSmall?.color),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 15),
+                        Card(
+                          margin: const EdgeInsets.symmetric(horizontal: 20),
+                          elevation: 6,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Column(
+                              children: [
+                                _buildProfileDetailRow(
+                                  context,
+                                  icon: Icons.email,
+                                  label: 'Email:',
+                                  value: _userProfile!['email'] ?? 'N/A',
+                                ),
+                                const Divider(height: 20, thickness: 1),
+                                _buildProfileDetailRow(
+                                  context,
+                                  icon: Icons.work,
+                                  label: 'Role:',
+                                  value: _userProfile!['role'] ?? 'N/A',
+                                ),
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 10),
-                          Text(
-                            'Email: ${_userProfile!['email'] ?? 'N/A'}',
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                          Text(
-                            'Role: ${_userProfile!['role'] ?? 'N/A'}',
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                          const SizedBox(height: 30),
-                        ],
-                        ElevatedButton(
+                        ),
+                        const SizedBox(height: 40),
+                        ElevatedButton.icon(
                           onPressed: () => _logout(context),
+                          icon: const Icon(Icons.logout),
+                          label: const Text(
+                            'Logout',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.redAccent,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                            padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 18),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0),
+                              borderRadius: BorderRadius.circular(15),
                             ),
-                            elevation: 5,
-                          ),
-                          child: const Text(
-                            'Logout',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            elevation: 8,
                           ),
                         ),
                       ],
                     ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildProfileDetailRow(BuildContext context, {required IconData icon, required String label, required String value}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 24),
+          const SizedBox(width: 15),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 18,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

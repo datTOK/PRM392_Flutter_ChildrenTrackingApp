@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:lottie/lottie.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:children_tracking_mobileapp/main.dart'; 
+import 'package:children_tracking_mobileapp/main.dart';
 import 'package:children_tracking_mobileapp/pages/register.dart';
 
 class LoginPage extends StatefulWidget {
@@ -119,10 +119,9 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login', style: TextStyle(color: Colors.white)),
+        title: const Text('Login'),
         centerTitle: true,
-        backgroundColor: Colors.black,
-        automaticallyImplyLeading: false, 
+        automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -167,8 +166,6 @@ class _LoginPageState extends State<LoginPage> {
                   : ElevatedButton(
                       onPressed: _login,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 50,
                           vertical: 15,
@@ -183,18 +180,22 @@ class _LoginPageState extends State<LoginPage> {
                         style: TextStyle(fontSize: 18),
                       ),
                     ),
-                    const SizedBox(height: 20),
+              const SizedBox(height: 30),
+              Divider(color: Colors.grey, height: 1, endIndent: 50, indent: 50),
+              const SizedBox(height: 30),
               TextButton(
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const RegisterPage()),
+                    MaterialPageRoute(
+                      builder: (context) => const RegisterPage(),
+                    ),
                   );
                 },
                 child: Text(
                   'Don\'t have an account? Register now',
                   style: TextStyle(
-                    color: Theme.of(context).primaryColor,
+                    fontSize: 16,
                     decoration: TextDecoration.underline,
                   ),
                 ),
