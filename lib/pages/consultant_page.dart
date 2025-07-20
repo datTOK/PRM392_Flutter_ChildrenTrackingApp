@@ -3,8 +3,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:children_tracking_mobileapp/pages/request_detail_page.dart';
 import 'package:children_tracking_mobileapp/pages/consultant_detail_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:children_tracking_mobileapp/pages/doctor_selection_page.dart';
+import 'package:provider/provider.dart';
+import 'package:children_tracking_mobileapp/provider/auth_provider.dart';
 
 class ConsultantPage extends StatefulWidget {
   const ConsultantPage({Key? key}) : super(key: key);
@@ -34,9 +35,9 @@ class _ConsultantPageState extends State<ConsultantPage> {
   }
 
   Future<void> _loadMemberIdAndFetch() async {
-    final prefs = await SharedPreferences.getInstance();
-    _memberId = prefs.getString('userId');
-    _accessToken = prefs.getString('accessToken');
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    _memberId = auth.userId;
+    _accessToken = auth.token;
     if (_memberId == null) {
       // Handle not logged in
       return;

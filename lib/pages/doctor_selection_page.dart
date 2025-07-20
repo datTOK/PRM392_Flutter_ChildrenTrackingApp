@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import 'package:children_tracking_mobileapp/provider/auth_provider.dart';
 
 class DoctorSelectionPage extends StatefulWidget {
   const DoctorSelectionPage({Key? key}) : super(key: key);
@@ -28,9 +29,9 @@ class _DoctorSelectionPageState extends State<DoctorSelectionPage> {
   }
 
   Future<void> _loadTokenAndFetchDoctors() async {
-    final prefs = await SharedPreferences.getInstance();
-    _accessToken = prefs.getString('accessToken');
-    _userId = prefs.getString('userId');
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    _accessToken = auth.token;
+    _userId = auth.userId;
     _fetchDoctors();
     _fetchChildren();
   }

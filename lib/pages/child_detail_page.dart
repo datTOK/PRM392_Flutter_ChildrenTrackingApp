@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:children_tracking_mobileapp/pages/child_growth_data_page.dart'; 
+import 'package:children_tracking_mobileapp/services/child_service.dart';
+import 'package:children_tracking_mobileapp/services/growth_data_service.dart';
 import 'package:children_tracking_mobileapp/models/child_models.dart';
+import 'package:children_tracking_mobileapp/pages/child_growth_data_page.dart';
+import 'package:provider/provider.dart';
+import 'package:children_tracking_mobileapp/provider/auth_provider.dart';
 
 class ChildDetailPage extends StatefulWidget {
   final String childId;
@@ -30,6 +31,9 @@ class _ChildDetailPageState extends State<ChildDetailPage> {
   final TextEditingController _inputDateController = TextEditingController();
   DateTime? _selectedInputDate;
 
+  late final ChildService _childService = ChildService();
+  late final GrowthDataService _growthDataService = GrowthDataService();
+
   @override
   void initState() {
     super.initState();
@@ -47,15 +51,13 @@ class _ChildDetailPageState extends State<ChildDetailPage> {
   }
 
   Future<void> _loadAuthDataAndFetchChildDetails() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    _authToken = prefs.getString('accessToken');
-
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    _authToken = auth.token;
     if (_authToken == null) {
       setState(() {
         _isLoadingChildDetails = false;
         _childDetailsErrorMessage = 'Authentication data not found. Please log in again.';
       });
-      // Optionally navigate back to login page
       return;
     }
     await _fetchChildDetails();
@@ -66,7 +68,6 @@ class _ChildDetailPageState extends State<ChildDetailPage> {
       _isLoadingChildDetails = true;
       _childDetailsErrorMessage = null;
     });
-
     if (_authToken == null) {
       setState(() {
         _childDetailsErrorMessage = 'Authentication token is missing. Cannot fetch child details.';
@@ -74,37 +75,12 @@ class _ChildDetailPageState extends State<ChildDetailPage> {
       });
       return;
     }
-
-    final url = Uri.parse('https://restapi-dy71.onrender.com/api/Child/${widget.childId}');
-
     try {
-      final response = await http.get(
-        url,
-        headers: {
-          'accept': '*/*',
-          'Authorization': 'Bearer $_authToken',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = json.decode(response.body);
-        if (responseData['child'] != null) {
-          setState(() {
-            _child = Child.fromJson(responseData['child']);
-            _isLoadingChildDetails = false;
-          });
-        } else {
-          setState(() {
-            _childDetailsErrorMessage = 'Child data not found in API response.';
-            _isLoadingChildDetails = false;
-          });
-        }
-      } else {
-        setState(() {
-          _childDetailsErrorMessage = 'Failed to load child details: ${response.statusCode} - ${response.body}';
-          _isLoadingChildDetails = false;
-        });
-      }
+      final child = await _childService.fetchChildById(childId: widget.childId, authToken: _authToken!);
+      setState(() {
+        _child = child;
+        _isLoadingChildDetails = false;
+      });
     } catch (e) {
       setState(() {
         _childDetailsErrorMessage = 'An error occurred: $e';
@@ -118,7 +94,6 @@ class _ChildDetailPageState extends State<ChildDetailPage> {
       setState(() {
         _isSubmittingGrowthData = true;
       });
-
       if (_authToken == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Authentication token not found. Please log in.')),
@@ -128,44 +103,27 @@ class _ChildDetailPageState extends State<ChildDetailPage> {
         });
         return;
       }
-
-      final url = Uri.parse('https://restapi-dy71.onrender.com/api/GrowthData?childId=${widget.childId}');
-
       try {
-        final response = await http.post(
-          url,
-          headers: {
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Authorization': 'Bearer $_authToken',
-          },
-          body: jsonEncode({
-            'height': double.parse(_heightController.text),
-            'weight': double.parse(_weightController.text),
-            'headCircumference': double.tryParse(_headCircumferenceController.text) ?? 0.0,
-            'armCircumference': double.tryParse(_armCircumferenceController.text) ?? 0.0,
-            'inputDate': _selectedInputDate!.toIso8601String(),
-          }),
+        await _growthDataService.addGrowthData(
+          childId: widget.childId,
+          height: double.parse(_heightController.text),
+          weight: double.parse(_weightController.text),
+          headCircumference: double.tryParse(_headCircumferenceController.text) ?? 0.0,
+          armCircumference: double.tryParse(_armCircumferenceController.text) ?? 0.0,
+          inputDate: _selectedInputDate!.toIso8601String(),
+          authToken: _authToken!,
         );
-
-        if (response.statusCode == 200 || response.statusCode == 201) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Growth data added successfully!')),
-          );
-          // Clear form
-          _heightController.clear();
-          _weightController.clear();
-          _headCircumferenceController.clear();
-          _armCircumferenceController.clear();
-          _inputDateController.clear();
-          setState(() {
-            _selectedInputDate = null;
-          });
-          // No need to fetch growth data here, as it's on a different page now
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to add growth data: ${response.statusCode} - ${response.body}')),
-          );
-        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Growth data added successfully!')),
+        );
+        _heightController.clear();
+        _weightController.clear();
+        _headCircumferenceController.clear();
+        _armCircumferenceController.clear();
+        _inputDateController.clear();
+        setState(() {
+          _selectedInputDate = null;
+        });
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('An error occurred: $e')),

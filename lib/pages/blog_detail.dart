@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:children_tracking_mobileapp/services/blog_service.dart';
 import 'package:insta_image_viewer/insta_image_viewer.dart';
+import 'package:children_tracking_mobileapp/utils/snackbar.dart';
 
 class BlogDetailPage extends StatefulWidget {
   final String blogId; 
@@ -16,6 +16,7 @@ class _BlogDetailPageState extends State<BlogDetailPage> {
   bool _isLoading = true;
   Map<String, dynamic>? _blogPost;
   String _errorMessage = '';
+  late final BlogService _blogService = BlogService();
 
   @override
   void initState() {
@@ -23,49 +24,21 @@ class _BlogDetailPageState extends State<BlogDetailPage> {
     _fetchBlogDetails();
   }
 
-  void _showSnackBar(String message, {Color backgroundColor = Colors.red}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: backgroundColor,
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
-
   Future<void> _fetchBlogDetails() async {
     setState(() {
       _isLoading = true;
       _errorMessage = '';
     });
-
-    final String apiUrl = 'https://restapi-dy71.onrender.com/api/Blog/${widget.blogId}';
-
     try {
-      final response = await http.get(
-        Uri.parse(apiUrl),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'accept': 'text/plain',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = jsonDecode(response.body);
-        setState(() {
-          _blogPost = responseData['blog']; 
-        });
-      } else {
-        setState(() {
-          _errorMessage = 'Failed to load blog details: ${response.reasonPhrase}';
-        });
-        _showSnackBar(_errorMessage);
-      }
+      final blog = await _blogService.fetchBlogDetail(widget.blogId);
+      setState(() {
+        _blogPost = blog;
+      });
     } catch (e) {
       setState(() {
         _errorMessage = 'Error fetching blog details: $e';
       });
-      _showSnackBar(_errorMessage);
+      showAppSnackBar(context, _errorMessage);
     } finally {
       setState(() {
         _isLoading = false;

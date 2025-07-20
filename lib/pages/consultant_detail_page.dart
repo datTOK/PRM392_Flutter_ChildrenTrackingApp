@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
+import 'package:provider/provider.dart';
+import 'package:children_tracking_mobileapp/provider/auth_provider.dart';
+import 'package:children_tracking_mobileapp/utils/date_format.dart';
+import 'package:children_tracking_mobileapp/utils/mappers.dart';
 
 class ConsultantDetailPage extends StatefulWidget {
   final String consultantId;
@@ -28,9 +31,9 @@ class _ConsultantDetailPageState extends State<ConsultantDetailPage> {
   }
 
   Future<void> _loadMemberIdAndFetch() async {
-    final prefs = await SharedPreferences.getInstance();
-    _memberId = prefs.getString('userId');
-    _accessToken = prefs.getString('accessToken');
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    _memberId = auth.userId;
+    _accessToken = auth.token;
     if (_memberId == null) {
       // Handle not logged in
       return;
@@ -93,29 +96,6 @@ class _ConsultantDetailPageState extends State<ConsultantDetailPage> {
       }
     } catch (e) {
       // Handle error
-    }
-  }
-
-  Color _statusColor(String? status) {
-    switch (status) {
-      case 'Pending':
-        return Colors.orange;
-      case 'Completed':
-        return Colors.green;
-      case 'Doctor_Accepted':
-        return Colors.blue;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  String _formatDate(String? dateStr) {
-    if (dateStr == null) return '';
-    try {
-      final date = DateTime.parse(dateStr);
-      return DateFormat('MMM d, yyyy').format(date);
-    } catch (e) {
-      return dateStr;
     }
   }
 
@@ -205,7 +185,7 @@ class _ConsultantDetailPageState extends State<ConsultantDetailPage> {
                                         color: Colors.white,
                                       ),
                                     ),
-                                    backgroundColor: _statusColor(
+                                    backgroundColor: statusColor(
                                       _consultantStatusText(
                                         _consultant!['status'],
                                       ),
@@ -213,7 +193,7 @@ class _ConsultantDetailPageState extends State<ConsultantDetailPage> {
                                   ),
                                   const SizedBox(width: 12),
                                   Text(
-                                    _formatDate(
+                                    formatDate(
                                       _consultant!['createdAt']?.toString(),
                                     ),
                                     style: const TextStyle(
@@ -342,7 +322,7 @@ class _ConsultantDetailPageState extends State<ConsultantDetailPage> {
                                                     ),
                                                     const SizedBox(height: 4),
                                                     Text(
-                                                      _formatDate(
+                                                      formatDate(
                                                         _consultant!['createdAt']
                                                             ?.toString(),
                                                       ),
@@ -363,7 +343,7 @@ class _ConsultantDetailPageState extends State<ConsultantDetailPage> {
                                                     color: Colors.white,
                                                   ),
                                                 ),
-                                                backgroundColor: _statusColor(
+                                                backgroundColor: statusColor(
                                                   _consultantStatusText(
                                                     _consultant!['status'],
                                                   ),
@@ -406,7 +386,7 @@ class _ConsultantDetailPageState extends State<ConsultantDetailPage> {
                                           _InfoBox(
                                             label: 'Timestamps',
                                             value:
-                                                'Created: ${_formatDate(_consultant!['createdAt']?.toString())}\nUpdated: ${_formatDate(_consultant!['updatedAt']?.toString())}',
+                                                'Created: ${formatDate(_consultant!['createdAt']?.toString())}\nUpdated: ${formatDate(_consultant!['updatedAt']?.toString())}',
                                           ),
                                           // ConsultantId
                                           _InfoBox(
@@ -710,11 +690,10 @@ class _ForumModalState extends State<_ForumModal> {
   }
 
   Future<void> _loadUserAndFetchMessages() async {
-    final prefs = await SharedPreferences.getInstance();
-    _accessToken = prefs.getString('accessToken');
-    _userId = prefs.getString('userId');
-    _userName = prefs.getString('userName');
-    _userRole = prefs.getString('userRole');
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    _accessToken = auth.token;
+    _userId = auth.userId;
+    // _userName and _userRole may still come from SharedPreferences if needed
     _fetchMessages();
   }
 

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:children_tracking_mobileapp/pages/login.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:provider/provider.dart';
+import 'package:children_tracking_mobileapp/provider/auth_provider.dart';
+import 'package:children_tracking_mobileapp/services/auth_service.dart';
+import 'package:children_tracking_mobileapp/utils/snackbar.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -27,53 +28,29 @@ class _SettingsPageState extends State<SettingsPage> {
       _isLoadingProfile = true;
       _profileErrorMessage = '';
     });
-
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? accessToken = prefs.getString('accessToken');
-
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    final String? accessToken = auth.token;
     if (accessToken == null) {
       setState(() {
         _profileErrorMessage = 'No access token found. Please log in again.';
         _isLoadingProfile = false;
       });
-      _showSnackBar(_profileErrorMessage, backgroundColor: Colors.orange);
+      showAppSnackBar(context, _profileErrorMessage, backgroundColor: Colors.orange);
       return;
     }
-
-    final String apiUrl = 'https://restapi-dy71.onrender.com/api/Auth/me';
-
     try {
-      final response = await http.get(
-        Uri.parse(apiUrl),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'accept': 'text/plain',
-          'Authorization': 'Bearer $accessToken',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = jsonDecode(response.body);
-        setState(() {
-          _userProfile = responseData;
-        });
-      } else if (response.statusCode == 401) {
-        setState(() {
-          _profileErrorMessage = 'Unauthorized. Please log in again.';
-        });
-        _showSnackBar(_profileErrorMessage, backgroundColor: Colors.orange);
-        _logout(context);
-      } else {
-        setState(() {
-          _profileErrorMessage = 'Failed to load profile: ${response.reasonPhrase}';
-        });
-        _showSnackBar(_profileErrorMessage);
-      }
-    } catch (e) {
+      final profile = await AuthService().fetchUserProfile(accessToken: accessToken);
       setState(() {
-        _profileErrorMessage = 'Error fetching profile: $e';
+        _userProfile = profile;
       });
-      _showSnackBar(_profileErrorMessage);
+    } on Exception catch (e) {
+      setState(() {
+        _profileErrorMessage = e.toString().replaceFirst('Exception: ', '');
+      });
+      showAppSnackBar(context, _profileErrorMessage, backgroundColor: Colors.orange);
+      if (_profileErrorMessage.contains('Unauthorized')) {
+        _logout(context);
+      }
     } finally {
       setState(() {
         _isLoadingProfile = false;
@@ -81,21 +58,8 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  void _showSnackBar(String message, {Color backgroundColor = Colors.red}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: backgroundColor,
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
-
   void _logout(BuildContext context) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('accessToken');
-    await prefs.remove('userId');
-
+    await Provider.of<AuthProvider>(context, listen: false).logout();
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const LoginPage()),

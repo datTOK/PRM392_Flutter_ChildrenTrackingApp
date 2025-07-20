@@ -1,10 +1,10 @@
 import 'package:children_tracking_mobileapp/pages/child_detail_page.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart'; 
+import 'package:children_tracking_mobileapp/services/child_service.dart'; 
 import 'package:children_tracking_mobileapp/pages/add_child_page.dart';
 import 'package:children_tracking_mobileapp/models/child_models.dart';
+import 'package:provider/provider.dart';
+import 'package:children_tracking_mobileapp/provider/auth_provider.dart';
 
 class ChildPage extends StatefulWidget {
   const ChildPage({super.key});
@@ -21,6 +21,8 @@ class _ChildPageState extends State<ChildPage> {
   String? _userId;
   String? _authToken;
 
+  late final ChildService _childService = ChildService();
+
   @override
   void initState() {
     super.initState();
@@ -28,9 +30,9 @@ class _ChildPageState extends State<ChildPage> {
   }
 
   Future<void> _loadAuthDataAndFetchChildren() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    _authToken = prefs.getString('accessToken');
-    _userId = prefs.getString('userId');
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    _authToken = auth.token;
+    _userId = auth.userId;
 
     if (_authToken == null || _userId == null) {
       setState(() {
@@ -49,8 +51,6 @@ class _ChildPageState extends State<ChildPage> {
       _isLoading = true;
       _errorMessage = null;
     });
-
-    // Ensure userId and authToken are available before making the call
     if (_userId == null || _authToken == null) {
       setState(() {
         _errorMessage = 'Authentication data is missing. Cannot fetch children.';
@@ -58,38 +58,12 @@ class _ChildPageState extends State<ChildPage> {
       });
       return;
     }
-
-    final url = Uri.parse('https://restapi-dy71.onrender.com/api/Child/user/$_userId');
     try {
-      final response = await http.get(
-        url,
-        headers: {
-          'accept': '*/*',
-          'Authorization': 'Bearer $_authToken',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = json.decode(response.body);
-        if (responseData['data'] is List) {
-          setState(() {
-            _children = (responseData['data'] as List)
-                .map((childJson) => Child.fromJson(childJson))
-                .toList();
-            _isLoading = false;
-          });
-        } else {
-          setState(() {
-            _errorMessage = 'Invalid data format from API';
-            _isLoading = false;
-          });
-        }
-      } else {
-        setState(() {
-          _errorMessage = 'Failed to load children: ${response.statusCode} - ${response.body}';
-          _isLoading = false;
-        });
-      }
+      final children = await _childService.fetchChildren(userId: _userId!, authToken: _authToken!);
+      setState(() {
+        _children = children;
+        _isLoading = false;
+      });
     } catch (e) {
       setState(() {
         _errorMessage = 'An error occurred: $e';
@@ -98,7 +72,6 @@ class _ChildPageState extends State<ChildPage> {
     }
   }
 
-  // Helper to map gender int to a display string (you'll need to define your mappings)
   String _getGenderString(int genderInt) {
     switch (genderInt) {
       case 0: return 'Male';
