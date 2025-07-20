@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:children_tracking_mobileapp/provider/auth_provider.dart';
+import 'package:children_tracking_mobileapp/utils/date_format.dart';
+import 'package:children_tracking_mobileapp/utils/mappers.dart';
 
 class RequestDetailPage extends StatefulWidget {
   final String requestId;
@@ -26,9 +29,9 @@ class _RequestDetailPageState extends State<RequestDetailPage> {
   }
 
   Future<void> _loadMemberIdAndFetch() async {
-    final prefs = await SharedPreferences.getInstance();
-    _memberId = prefs.getString('userId');
-    _accessToken = prefs.getString('accessToken');
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    _memberId = auth.userId;
+    _accessToken = auth.token;
     if (_memberId == null) {
       // Handle not logged in
       return;
@@ -63,51 +66,6 @@ class _RequestDetailPageState extends State<RequestDetailPage> {
       // Handle error
     } finally {
       setState(() => _loading = false);
-    }
-  }
-
-  Color _statusColor(String? status) {
-    switch (status) {
-      case 'Pending':
-        return Colors.orange;
-      case 'Completed':
-        return Colors.green;
-      case 'Doctor_Accepted':
-        return Colors.blue;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  String _formatDate(String? dateStr) {
-    if (dateStr == null) return '';
-    try {
-      final date = DateTime.parse(dateStr);
-      return DateFormat('MMM d, yyyy').format(date);
-    } catch (e) {
-      return dateStr;
-    }
-  }
-
-  String _statusText(dynamic status) {
-    switch (status) {
-      case 0:
-      case '0':
-        return 'Pending';
-      case 1:
-      case '1':
-        return 'Admin_Rejected';
-      case 2:
-      case '2':
-        return 'Admin_Accepted';
-      case 3:
-      case '3':
-        return 'Doctor_Accepted';
-      case 4:
-      case '4':
-        return 'Doctor_Rejected';
-      default:
-        return status?.toString() ?? '';
     }
   }
 
@@ -172,16 +130,16 @@ class _RequestDetailPageState extends State<RequestDetailPage> {
                           children: [
                             Chip(
                               label: Text(
-                                _statusText(_request!['status']),
+                                statusText(_request!['status']),
                                 style: const TextStyle(color: Colors.white),
                               ),
-                              backgroundColor: _statusColor(
-                                _statusText(_request!['status']),
+                              backgroundColor: statusColor(
+                                _request!['status'],
                               ),
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              _formatDate(_request!['createdAt']?.toString()),
+                              formatDate(_request!['createdAt']?.toString()),
                               style: const TextStyle(
                                 fontSize: 14,
                                 color: Colors.grey,

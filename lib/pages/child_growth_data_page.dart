@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:children_tracking_mobileapp/models/growth_models.dart'; // Import your growth models
+import 'package:children_tracking_mobileapp/services/growth_data_service.dart';
+import 'package:provider/provider.dart';
+import 'package:children_tracking_mobileapp/provider/auth_provider.dart';
 
 class ChildGrowthDataPage extends StatefulWidget {
   final String childId;
@@ -24,6 +24,7 @@ class _ChildGrowthDataPageState extends State<ChildGrowthDataPage> {
   bool _isLoadingGrowthData = true;
   String? _growthDataErrorMessage;
   String? _authToken;
+  late final GrowthDataService _growthDataService = GrowthDataService();
 
   @override
   void initState() {
@@ -32,8 +33,8 @@ class _ChildGrowthDataPageState extends State<ChildGrowthDataPage> {
   }
 
   Future<void> _loadAuthDataAndFetchGrowthData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    _authToken = prefs.getString('accessToken');
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    _authToken = auth.token;
 
     if (_authToken == null) {
       setState(() {
@@ -59,39 +60,13 @@ class _ChildGrowthDataPageState extends State<ChildGrowthDataPage> {
       return;
     }
 
-    final url = Uri.parse('https://restapi-dy71.onrender.com/api/GrowthData/child/${widget.childId}');
-
     try {
-      final response = await http.get(
-        url,
-        headers: {
-          'accept': '*/*',
-          'Authorization': 'Bearer $_authToken',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = json.decode(response.body);
-        if (responseData['data'] is List) {
-          setState(() {
-            _growthData = (responseData['data'] as List)
-                .map((growthJson) => GrowthData.fromJson(growthJson))
-                .toList();
-            _growthData.sort((a, b) => a.inputDate.compareTo(b.inputDate)); // Sort by date for chart
-            _isLoadingGrowthData = false;
-          });
-        } else {
-          setState(() {
-            _growthDataErrorMessage = 'Invalid growth data format from API';
-            _isLoadingGrowthData = false;
-          });
-        }
-      } else {
-        setState(() {
-          _growthDataErrorMessage = 'Failed to load growth data: ${response.statusCode} - ${response.body}';
-          _isLoadingGrowthData = false;
-        });
-      }
+      final growthData = await _growthDataService.fetchGrowthData(childId: widget.childId, authToken: _authToken!);
+      setState(() {
+        _growthData = growthData;
+        _growthData.sort((a, b) => a.inputDate.compareTo(b.inputDate));
+        _isLoadingGrowthData = false;
+      });
     } catch (e) {
       setState(() {
         _growthDataErrorMessage = 'An error occurred fetching growth data: $e';

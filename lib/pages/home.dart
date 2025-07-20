@@ -4,6 +4,7 @@ import 'package:lottie/lottie.dart';
 import 'package:children_tracking_mobileapp/pages/add_child_page.dart';
 import 'package:provider/provider.dart'; 
 import 'package:children_tracking_mobileapp/provider/theme_provider.dart'; 
+import 'package:children_tracking_mobileapp/utils/snackbar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -101,19 +102,13 @@ class _HomePageState extends State<HomePage> {
                             MaterialPageRoute(builder: (context) => const AddChildPage()),
                           );
                           if (result == true) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Child added successfully!')),
-                            );
+                            showAppSnackBar(context, 'Child added successfully!');
                           }
                         } else if (action['name'] == 'Toggle Theme') {
                           themeProvider.toggleTheme(); 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Toggled theme to ${themeProvider.themeMode.name}')),
-                          );
+                          showAppSnackBar(context, 'Toggled theme to ${themeProvider.themeMode.name}');
                         } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Quick action: ${action['name']}')),
-                          );
+                          showAppSnackBar(context, 'Quick action: ${action['name']}');
                         }
                       },
                       customBorder: const CircleBorder(),
@@ -167,9 +162,7 @@ class _HomePageState extends State<HomePage> {
                   color: Theme.of(context).cardTheme.color, 
                   child: InkWell(
                     onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Tapped on ${category['name']}')),
-                      );
+                      showAppSnackBar(context, 'Tapped on ${category['name']}');
                     },
                     borderRadius: BorderRadius.circular(15),
                     child: Column(

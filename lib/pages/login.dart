@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:lottie/lottie.dart';
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:children_tracking_mobileapp/main.dart';
 import 'package:children_tracking_mobileapp/pages/register.dart';
+import 'package:provider/provider.dart';
+import 'package:children_tracking_mobileapp/provider/auth_provider.dart';
+import 'package:children_tracking_mobileapp/services/auth_service.dart';
+import 'package:children_tracking_mobileapp/utils/snackbar.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -25,89 +26,25 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _showSnackBar(String message, {Color backgroundColor = Colors.red}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: backgroundColor,
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
-
-  Map<String, dynamic>? _decodeJwt(String token) {
-    try {
-      final parts = token.split('.');
-      if (parts.length != 3) {
-        return null; // Not a valid JWT format
-      }
-      final payload = utf8.decode(
-        base64Url.decode(base64Url.normalize(parts[1])),
-      );
-      return json.decode(payload);
-    } catch (e) {
-      print('Error decoding JWT: $e');
-      return null;
-    }
-  }
-
   Future<void> _login() async {
     setState(() {
       _isLoading = true;
     });
-
-    final String apiUrl = 'https://restapi-dy71.onrender.com/api/Auth/login';
-    final Map<String, String> data = {
-      'email': _emailController.text,
-      'password': _passwordController.text,
-    };
-
     try {
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'accept': 'text/plain',
-        },
-        body: jsonEncode(data),
+      final result = await AuthService().login(
+        email: _emailController.text,
+        password: _passwordController.text,
       );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = jsonDecode(response.body);
-        final String? accessToken = responseData['accessToken'];
-
-        if (accessToken != null) {
-          // Decode the access token to get user ID
-          final Map<String, dynamic>? jwtPayload = _decodeJwt(accessToken);
-          final String? userId =
-              jwtPayload?['userId']; // Extract userId from payload
-          print('[DEBUG] Login userId: $userId');
-
-          if (userId != null) {
-            // Save both the access token and user ID
-            SharedPreferences prefs = await SharedPreferences.getInstance();
-            await prefs.setString('accessToken', accessToken);
-            await prefs.setString('userId', userId); // Save userId
-
-            _showSnackBar('Login successful!', backgroundColor: Colors.green);
-            // Navigate to RootPage (your main app content)
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const RootPage()),
-            );
-          } else {
-            _showSnackBar('Login failed: User ID not found in token.');
-          }
-        } else {
-          _showSnackBar('Login failed: Access token not found.');
-        }
-      } else {
-        _showSnackBar(
-          'Login failed: ${response.reasonPhrase ?? 'Unknown error'}',
-        );
-      }
+      final accessToken = result['accessToken'] as String;
+      final userId = result['userId'] as String;
+      await Provider.of<AuthProvider>(context, listen: false).login(accessToken, userId);
+      showAppSnackBar(context, 'Login successful!', backgroundColor: Colors.green);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const RootPage()),
+      );
     } catch (e) {
-      _showSnackBar('Error during login: $e');
+      showAppSnackBar(context, 'Login failed: $e');
     } finally {
       setState(() {
         _isLoading = false;

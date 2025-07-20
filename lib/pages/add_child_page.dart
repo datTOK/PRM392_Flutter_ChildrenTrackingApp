@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert'; // For jsonEncode
-import 'package:shared_preferences/shared_preferences.dart'; // Import for SharedPreferences
+import 'package:children_tracking_mobileapp/services/child_service.dart';
+import 'package:provider/provider.dart';
+import 'package:children_tracking_mobileapp/provider/auth_provider.dart';
+import 'package:children_tracking_mobileapp/utils/snackbar.dart';
 
 class AddChildPage extends StatefulWidget {
   const AddChildPage({super.key});
@@ -52,6 +53,7 @@ class _AddChildPageState extends State<AddChildPage> {
   };
 
   bool _isAddingChild = false; // New state variable for loading indicator
+  late final ChildService _childService = ChildService();
 
   @override
   void dispose() {
@@ -79,98 +81,62 @@ class _AddChildPageState extends State<AddChildPage> {
   Future<void> _addChild() async {
     if (_formKey.currentState!.validate()) {
       if (_selectedGenderInt == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a gender')),
-        );
+        showAppSnackBar(context, 'Please select a gender');
         return;
       }
       if (_selectedDate == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a birth date')),
-        );
+        showAppSnackBar(context, 'Please select a birth date');
         return;
       }
-      if (_selectedFeedingType == null) { // Add validation for feeding type
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a feeding type')),
-        );
+      if (_selectedFeedingType == null) {
+        showAppSnackBar(context, 'Please select a feeding type');
         return;
       }
-
       setState(() {
-        _isAddingChild = true; // Show loading indicator
+        _isAddingChild = true;
       });
-
-      // Retrieve the access token from SharedPreferences
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? accessToken = prefs.getString('accessToken');
-
+      final auth = Provider.of<AuthProvider>(context, listen: false);
+      final String? accessToken = auth.token;
       if (accessToken == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Authentication token not found. Please log in.')),
-        );
+        showAppSnackBar(context, 'Authentication token not found. Please log in.');
         setState(() {
           _isAddingChild = false;
         });
         return;
       }
-
       final String name = _nameController.text;
       final String note = _noteController.text;
       final int gender = _selectedGenderInt!;
       final String birthDate = _selectedDate!.toIso8601String();
       final int feedingType = _selectedFeedingType!;
       final List<int> allergies = _selectedAllergies;
-
-      // Correct API URL
-      final url = Uri.parse('https://restapi-dy71.onrender.com/api/Child');
-
       try {
-        final response = await http.post(
-          url,
-          headers: {
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Authorization': 'Bearer $accessToken', // Add the Authorization header
-          },
-          body: jsonEncode({
-            'name': name,
-            'gender': gender,
-            'birthDate': birthDate,
-            'note': note,
-            'feedingType': feedingType,
-            'allergies': allergies,
-          }),
+        await _childService.addChild(
+          name: name,
+          gender: gender,
+          birthDate: birthDate,
+          note: note,
+          feedingType: feedingType,
+          allergies: allergies,
+          authToken: accessToken,
         );
-
-        if (response.statusCode == 200 || response.statusCode == 201) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Child added successfully!')),
-          );
-          // Clear the form
-          _nameController.clear();
-          _birthDateController.clear();
-          _noteController.clear();
-          setState(() {
-            _selectedGenderString = null;
-            _selectedGenderInt = null;
-            _selectedDate = null;
-            _selectedFeedingType = null;
-            _selectedAllergies = [];
-          });
-          // Pop the page and send 'true' to indicate success, so ChildPage can refresh
-          Navigator.pop(context, true);
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to add child: ${response.statusCode} - ${response.body}')),
-          );
-        }
+        showAppSnackBar(context, 'Child added successfully!');
+        _nameController.clear();
+        _birthDateController.clear();
+        _noteController.clear();
+        setState(() {
+          _selectedGenderString = null;
+          _selectedGenderInt = null;
+          _selectedDate = null;
+          _selectedFeedingType = null;
+          _selectedAllergies = [];
+        });
+        Navigator.pop(context, true);
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('An error occurred: $e')),
-        );
+        showAppSnackBar(context, 'An error occurred: $e');
       } finally {
         setState(() {
-          _isAddingChild = false; // Hide loading indicator
+          _isAddingChild = false;
         });
       }
     }
