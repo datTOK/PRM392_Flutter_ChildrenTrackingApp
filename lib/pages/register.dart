@@ -3,6 +3,7 @@ import 'package:lottie/lottie.dart';
 import 'package:children_tracking_mobileapp/pages/login.dart';
 import 'package:children_tracking_mobileapp/services/auth_service.dart';
 import 'package:children_tracking_mobileapp/utils/snackbar.dart';
+import 'package:children_tracking_mobileapp/components/custom_app_bar.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -63,10 +64,10 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Register'),
+      appBar: const CustomAppBar(
+        title: 'Register',
+        icon: Icons.app_registration,
         centerTitle: true,
-        automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -74,6 +75,7 @@ class _RegisterPageState extends State<RegisterPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              const SizedBox(height: 10),
               Lottie.network(
                 'https://lottie.host/1ce27522-55ba-4f73-a824-4c2dc116d2c9/q97IkZp70L.json',
                 height: 150,
@@ -81,76 +83,117 @@ class _RegisterPageState extends State<RegisterPage> {
                 reverse: false,
                 animate: true,
               ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: 'Name',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  prefixIcon: const Icon(Icons.person),
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  prefixIcon: const Icon(Icons.email),
-                ),
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _passwordController,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  prefixIcon: const Icon(Icons.lock),
-                ),
-                obscureText: true,
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _confirmPasswordController,
-                decoration: InputDecoration(
-                  labelText: 'Confirm Password',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  prefixIcon: const Icon(Icons.lock),
-                ),
-                obscureText: true,
-              ),
-              const SizedBox(height: 30),
-              _isLoading
-                  ? const CircularProgressIndicator(color: Colors.black)
-                  : ElevatedButton(
-                      onPressed: _register,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 50,
-                          vertical: 15,
+              const SizedBox(height: 16),
+              Card(
+                color: Colors.blue.shade50,
+                elevation: 4,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 28),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Create Account',
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.indigo.shade700,
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 22),
+                      TextField(
+                        controller: _nameController,
+                        decoration: InputDecoration(
+                          labelText: 'Name',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: const BorderSide(color: Colors.indigo, width: 2),
+                          ),
+                          prefixIcon: const Icon(Icons.person, color: Colors.indigo),
                         ),
-                        elevation: 5,
                       ),
-                      child: const Text(
-                        'Register',
-                        style: TextStyle(fontSize: 18),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _emailController,
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: const BorderSide(color: Colors.indigo, width: 2),
+                          ),
+                          prefixIcon: const Icon(Icons.email, color: Colors.indigo),
+                        ),
+                        keyboardType: TextInputType.emailAddress,
                       ),
-                    ),
-              const SizedBox(height: 20),
-              Divider(color: Colors.grey, height: 1, endIndent: 50, indent: 50),
-              const SizedBox(height: 20),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _passwordController,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: const BorderSide(color: Colors.indigo, width: 2),
+                          ),
+                          prefixIcon: const Icon(Icons.lock, color: Colors.indigo),
+                        ),
+                        obscureText: true,
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _confirmPasswordController,
+                        decoration: InputDecoration(
+                          labelText: 'Confirm Password',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: const BorderSide(color: Colors.indigo, width: 2),
+                          ),
+                          prefixIcon: const Icon(Icons.lock, color: Colors.indigo),
+                        ),
+                        obscureText: true,
+                      ),
+                      const SizedBox(height: 26),
+                      _isLoading
+                          ? const Center(child: CircularProgressIndicator(color: Colors.indigo))
+                          : SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: _register,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.indigo,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12.0),
+                                  ),
+                                  elevation: 6,
+                                ),
+                                child: const Text(
+                                  'Register',
+                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 28),
+              Divider(color: Colors.grey.shade300, height: 1, endIndent: 50, indent: 50),
+              const SizedBox(height: 24),
               TextButton(
                 onPressed: () {
                   Navigator.pushReplacement(
@@ -163,6 +206,8 @@ class _RegisterPageState extends State<RegisterPage> {
                   style: TextStyle(
                     fontSize: 16,
                     decoration: TextDecoration.underline,
+                    color: Colors.indigo.shade700,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),

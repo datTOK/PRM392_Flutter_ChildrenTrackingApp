@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:children_tracking_mobileapp/services/blog_service.dart';
 import 'package:children_tracking_mobileapp/pages/blog_detail.dart';
 import 'package:children_tracking_mobileapp/utils/snackbar.dart';
+import 'package:children_tracking_mobileapp/components/custom_app_bar.dart';
 
 class BlogPage extends StatefulWidget {
   const BlogPage({super.key});
@@ -42,27 +43,9 @@ class _BlogPageState extends State<BlogPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false, 
-        title: Row(
-          mainAxisSize: MainAxisSize.min, 
-          children: [
-            const Text(
-              'Blog Posts',
-            ),
-            const SizedBox(width: 5), 
-            Icon(Icons.library_books, size: 26),
-          ],
-        ),
-        centerTitle: true,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            bottomRight: Radius.circular(25),
-            bottomLeft: Radius.circular(25),
-          ),
-        ),
-        toolbarHeight: 60, 
-        elevation: 5.00,
+      appBar: const CustomAppBar(
+        title: 'Blog Posts',
+        icon: Icons.library_books,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -73,52 +56,100 @@ class _BlogPageState extends State<BlogPage> {
               itemBuilder: (context, index) {
                 final post = _blogPosts[index];
                 return Card(
-                      margin: const EdgeInsets.all(8.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      elevation: 20.0,
-                      shadowColor: Colors.blue.shade100,
-                      clipBehavior: Clip.antiAlias,
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => BlogDetailPage(
-                                blogId: post['id'], 
-                              ),
-                            ),
-                          );
-                        },
-                        child: Column(
+                  margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  color: Colors.blue.shade50,
+                  elevation: 5,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BlogDetailPage(
+                            blogId: post['id'],
+                          ),
+                        ),
+                      );
+                    },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Blog image with gradient overlay
+                        Stack(
                           children: [
-                            ListTile(
-                              title: Text(post['title'] ?? 'No Title'),
-                              subtitle: Text(
-                                // Limiting subtitle content for preview
-                                (post['content'] ?? 'No Content').replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '').substring(
-                                  0,
-                                  (post['content'] ?? 'No Content').replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '').length > 100
-                                      ? 100
-                                      : (post['content'] ?? 'No Content').replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '').length,
-                                ) + '...',
-                              ),
-                              tileColor: Colors.blue.shade300,
-                            ),
-                            Image.network(
-                              post['imageUrl'] ?? 'https://via.placeholder.com/150',
-                              height: 150,
+                            SizedBox(
                               width: double.infinity,
-                              fit: BoxFit.cover,
-                              isAntiAlias: true,
+                              height: 170,
+                              child: Image.network(
+                                post['imageUrl'] ?? 'https://via.placeholder.com/150',
+                                fit: BoxFit.cover,
+                                isAntiAlias: true,
+                              ),
+                            ),
+                            Positioned.fill(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(20),
+                                    topRight: Radius.circular(20),
+                                  ),
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Colors.black.withOpacity(0.08),
+                                      Colors.black.withOpacity(0.18),
+                                    ],
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                  ),
+                                ),
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                    );
-                  },
-                ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(18, 16, 18, 12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                post['title'] ?? 'No Title',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                  color: Colors.indigo,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                (post['content'] ?? 'No Content')
+                                        .replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '')
+                                        .substring(
+                                          0,
+                                          (post['content'] ?? 'No Content')
+                                                      .replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '').length > 100
+                                              ? 100
+                                              : (post['content'] ?? 'No Content')
+                                                  .replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '').length,
+                                        ) + '...',
+                                style: const TextStyle(fontSize: 15, color: Colors.black87),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
     );
   }
 }

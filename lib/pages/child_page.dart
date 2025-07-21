@@ -5,6 +5,7 @@ import 'package:children_tracking_mobileapp/pages/add_child_page.dart';
 import 'package:children_tracking_mobileapp/models/child_models.dart';
 import 'package:provider/provider.dart';
 import 'package:children_tracking_mobileapp/provider/auth_provider.dart';
+import 'package:children_tracking_mobileapp/components/custom_app_bar.dart';
 
 class ChildPage extends StatefulWidget {
   const ChildPage({super.key});
@@ -109,27 +110,9 @@ class _ChildPageState extends State<ChildPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false, 
-        title: Row(
-          mainAxisSize: MainAxisSize.min, 
-          children: [
-            const Text(
-              'Your Children',
-            ),
-            const SizedBox(width: 5), 
-            Icon(Icons.child_care, size: 26),
-          ],
-        ),
-        centerTitle: true,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            bottomRight: Radius.circular(25),
-            bottomLeft: Radius.circular(25),
-          ),
-        ),
-        toolbarHeight: 60, 
-        elevation: 5.00,
+      appBar: const CustomAppBar(
+        title: 'Your Children',
+        icon: Icons.child_care,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -159,6 +142,8 @@ class _ChildPageState extends State<ChildPage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          Icon(Icons.child_care, size: 64, color: Colors.blueAccent),
+                          const SizedBox(height: 18),
                           const Text(
                             'No children added yet.',
                             style: TextStyle(fontSize: 18, color: Colors.grey),
@@ -176,6 +161,25 @@ class _ChildPageState extends State<ChildPage> {
                       itemCount: _children.length,
                       itemBuilder: (context, index) {
                         final child = _children[index];
+                        IconData genderIcon;
+                        Color genderColor;
+                        switch (child.gender) {
+                          case 0:
+                            genderIcon = Icons.male;
+                            genderColor = Colors.blueAccent;
+                            break;
+                          case 1:
+                            genderIcon = Icons.female;
+                            genderColor = Colors.pinkAccent;
+                            break;
+                          case 2:
+                            genderIcon = Icons.transgender;
+                            genderColor = Colors.purpleAccent;
+                            break;
+                          default:
+                            genderIcon = Icons.help_outline;
+                            genderColor = Colors.grey;
+                        }
                         return GestureDetector(
                           onTap: () {
                             Navigator.push(
@@ -185,36 +189,105 @@ class _ChildPageState extends State<ChildPage> {
                               ),
                             );
                           },
-                          child: Card(
-                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            elevation: 3,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.blue.shade100.withOpacity(0.18),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                              color: Colors.blue.shade50, // Use a light blue background instead of white
                             ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    child.name,
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        // Gender avatar
+                                        CircleAvatar(
+                                          radius: 28,
+                                          backgroundColor: genderColor.withOpacity(0.15),
+                                          child: Icon(genderIcon, color: genderColor, size: 32),
+                                        ),
+                                        const SizedBox(width: 18),
+                                        // Child info
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                child.name,
+                                                style: const TextStyle(
+                                                  fontSize: 22,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                'Birth Date: ${child.birthDate.toLocal().toString().split(' ')[0]}',
+                                                style: TextStyle(
+                                                  color: Colors.grey.shade700,
+                                                  fontSize: 15,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 8),
+                                              Row(
+                                                children: [
+                                                  Icon(genderIcon, color: genderColor, size: 18),
+                                                  const SizedBox(width: 6),
+                                                  Text(_getGenderString(child.gender)),
+                                                  const SizedBox(width: 16),
+                                                  Icon(Icons.restaurant, color: Colors.orange, size: 18),
+                                                  const SizedBox(width: 6),
+                                                  Text(_getFeedingTypeString(child.feedingType)),
+                                                ],
+                                              ),
+                                              const SizedBox(height: 8),
+                                              // Allergies as chips
+                                              Wrap(
+                                                spacing: 6,
+                                                runSpacing: 2,
+                                                children: child.allergies.isEmpty
+                                                    ? [
+                                                        Chip(
+                                                          label: const Text('No allergies'),
+                                                          backgroundColor: Colors.green.shade50,
+                                                          labelStyle: const TextStyle(color: Colors.green),
+                                                        ),
+                                                      ]
+                                                    : _getAllergiesString(child.allergies)
+                                                        .split(', ')
+                                                        .map((allergy) => Chip(
+                                                              label: Text(allergy),
+                                                              backgroundColor: Colors.red.shade50,
+                                                              labelStyle: const TextStyle(color: Colors.redAccent),
+                                                            ))
+                                                        .toList(),
+                                              ),
+                                              if (child.note.isNotEmpty && child.note != 'N/A')
+                                                Padding(
+                                                  padding: const EdgeInsets.only(top: 8.0),
+                                                  child: Text(
+                                                    'Note: ${child.note}',
+                                                    style: const TextStyle(fontStyle: FontStyle.italic, color: Colors.black87),
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
-                                  Text('Birth Date: ${child.birthDate.toLocal().toString().split(' ')[0]}'),
-                                  Text('Gender: ${_getGenderString(child.gender)}'),
-                                  Text('Feeding Type: ${_getFeedingTypeString(child.feedingType)}'),
-                                  Text('Allergies: ${_getAllergiesString(child.allergies)}'),
-                                  if (child.note.isNotEmpty && child.note != 'N/A') // Check for 'N/A' as well
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 8.0),
-                                      child: Text('Note: ${child.note}', style: const TextStyle(fontStyle: FontStyle.italic)),
-                                    ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
                         );

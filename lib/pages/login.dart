@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:children_tracking_mobileapp/provider/auth_provider.dart';
 import 'package:children_tracking_mobileapp/services/auth_service.dart';
 import 'package:children_tracking_mobileapp/utils/snackbar.dart';
+import 'package:children_tracking_mobileapp/components/custom_app_bar.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -55,10 +56,10 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Login'),
+      appBar: const CustomAppBar(
+        title: 'Login',
+        icon: Icons.login,
         centerTitle: true,
-        automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -66,60 +67,94 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              const SizedBox(height: 10),
               Lottie.network(
                 'https://lottie.host/1ce27522-55ba-4f73-a824-4c2dc116d2c9/q97IkZp70L.json',
-                height: 200,
+                height: 160,
                 repeat: true,
                 reverse: false,
                 animate: true,
               ),
-              const SizedBox(height: 30),
-              TextField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  prefixIcon: const Icon(Icons.email),
-                ),
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _passwordController,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  prefixIcon: const Icon(Icons.lock),
-                ),
-                obscureText: true,
-              ),
-              const SizedBox(height: 30),
-              _isLoading
-                  ? const CircularProgressIndicator(color: Colors.black)
-                  : ElevatedButton(
-                      onPressed: _login,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 50,
-                          vertical: 15,
+              const SizedBox(height: 18),
+              Card(
+                color: Colors.blue.shade50,
+                elevation: 4,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 28),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Welcome Back!',
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.indigo.shade700,
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.0),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      TextField(
+                        controller: _emailController,
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: const BorderSide(color: Colors.indigo, width: 2),
+                          ),
+                          prefixIcon: const Icon(Icons.email, color: Colors.indigo),
                         ),
-                        elevation: 5,
+                        keyboardType: TextInputType.emailAddress,
                       ),
-                      child: const Text(
-                        'Login',
-                        style: TextStyle(fontSize: 18),
+                      const SizedBox(height: 18),
+                      TextField(
+                        controller: _passwordController,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: const BorderSide(color: Colors.indigo, width: 2),
+                          ),
+                          prefixIcon: const Icon(Icons.lock, color: Colors.indigo),
+                        ),
+                        obscureText: true,
                       ),
-                    ),
-              const SizedBox(height: 30),
-              Divider(color: Colors.grey, height: 1, endIndent: 50, indent: 50),
-              const SizedBox(height: 30),
+                      const SizedBox(height: 26),
+                      _isLoading
+                          ? const Center(child: CircularProgressIndicator(color: Colors.indigo))
+                          : SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: _login,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.indigo,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12.0),
+                                  ),
+                                  elevation: 6,
+                                ),
+                                child: const Text(
+                                  'Login',
+                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+              Divider(color: Colors.grey.shade300, height: 1, endIndent: 50, indent: 50),
+              const SizedBox(height: 28),
               TextButton(
                 onPressed: () {
                   Navigator.push(
@@ -134,6 +169,8 @@ class _LoginPageState extends State<LoginPage> {
                   style: TextStyle(
                     fontSize: 16,
                     decoration: TextDecoration.underline,
+                    color: Colors.indigo.shade700,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
