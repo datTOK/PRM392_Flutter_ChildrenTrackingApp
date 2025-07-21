@@ -1,3 +1,4 @@
+import 'package:children_tracking_mobileapp/components/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -113,7 +114,10 @@ class _ConsultantPageState extends State<ConsultantPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Consultant'), centerTitle: true, automaticallyImplyLeading: false),
+      appBar: const CustomAppBar(
+        title: 'Consultant',
+        icon: Icons.medical_services,
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),

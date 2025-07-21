@@ -186,37 +186,6 @@ class _ChildDetailPageState extends State<ChildDetailPage> {
     return allergies.map((id) => allergyMap[id] ?? 'Unknown').join(', ');
   }
 
-  // Helper method to build a row for child details
-  Widget _buildDetailRow(String label, String value, {FontStyle? fontStyle}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 120, // Fixed width for labels
-            child: Text(
-              '$label:',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: TextStyle(
-                fontSize: 16,
-                fontStyle: fontStyle,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -257,28 +226,110 @@ class _ChildDetailPageState extends State<ChildDetailPage> {
                           ? const Center(child: Text('No child details available.'))
                           : Card(
                               elevation: 4,
+                              color: Colors.blue.shade50,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(16),
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.all(20.0),
+                                padding: const EdgeInsets.symmetric(vertical: 28.0, horizontal: 20.0),
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
+                                    // Baby avatar icon
+                                    CircleAvatar(
+                                      radius: 38,
+                                      backgroundColor: Colors.blueAccent.withOpacity(0.15),
+                                      child: Icon(Icons.child_care, color: Colors.blueAccent, size: 44),
+                                    ),
+                                    const SizedBox(height: 18),
                                     Text(
                                       _child!.name,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 24,
-                                      )
+                                        fontSize: 26,
+                                      ),
+                                      textAlign: TextAlign.center,
                                     ),
-                                    const Divider(height: 30, thickness: 1),
-                                    _buildDetailRow('Birth Date', _child!.birthDate.toLocal().toString().split(' ')[0]),
-                                    _buildDetailRow('Gender', _getGenderString(_child!.gender)),
-                                    _buildDetailRow('Feeding Type', _getFeedingTypeString(_child!.feedingType)),
-                                    _buildDetailRow('Allergies', _getAllergiesString(_child!.allergies)),
+                                    const SizedBox(height: 8),
+                                    Divider(height: 30, thickness: 1, color: Colors.blue.shade100),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.cake, color: Colors.indigo, size: 20),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          _child!.birthDate.toLocal().toString().split(' ')[0],
+                                          style: TextStyle(fontSize: 16, color: Colors.grey.shade800),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.wc, color: Colors.indigo, size: 20),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          _getGenderString(_child!.gender),
+                                          style: TextStyle(fontSize: 16, color: Colors.grey.shade800),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.restaurant, color: Colors.orange, size: 20),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          _getFeedingTypeString(_child!.feedingType),
+                                          style: TextStyle(fontSize: 16, color: Colors.grey.shade800),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 10),
+                                    // Allergies as chips
+                                    Align(
+                                      alignment: Alignment.center,
+                                      child: Wrap(
+                                        spacing: 8,
+                                        runSpacing: 2,
+                                        children: _child!.allergies.isEmpty
+                                            ? [
+                                                Chip(
+                                                  label: const Text('No allergies'),
+                                                  backgroundColor: Colors.green.shade50,
+                                                  labelStyle: const TextStyle(color: Colors.green),
+                                                ),
+                                              ]
+                                            : _getAllergiesString(_child!.allergies)
+                                                .split(', ')
+                                                .map((allergy) => Chip(
+                                                      label: Text(allergy),
+                                                      backgroundColor: Colors.red.shade50,
+                                                      labelStyle: const TextStyle(color: Colors.redAccent),
+                                                    ))
+                                                .toList(),
+                                      ),
+                                    ),
                                     if (_child!.note.isNotEmpty && _child!.note != 'N/A')
-                                      _buildDetailRow('Note', _child!.note, fontStyle: FontStyle.italic),
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 12.0),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Icon(Icons.sticky_note_2, color: Colors.indigo, size: 20),
+                                            const SizedBox(width: 6),
+                                            Flexible(
+                                              child: Text(
+                                                _child!.note,
+                                                style: const TextStyle(fontStyle: FontStyle.italic, color: Colors.black87, fontSize: 16),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                   ],
                                 ),
                               ),

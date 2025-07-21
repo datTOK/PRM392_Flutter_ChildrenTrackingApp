@@ -106,9 +106,10 @@ class _ChildGrowthDataPageState extends State<ChildGrowthDataPage> {
 
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      color: Colors.blue.shade50,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(18.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -117,9 +118,10 @@ class _ChildGrowthDataPageState extends State<ChildGrowthDataPage> {
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
+                color: Colors.indigo,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             SizedBox(
               height: 200, // Fixed height for charts
               child: LineChart(
@@ -200,13 +202,20 @@ class _ChildGrowthDataPageState extends State<ChildGrowthDataPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '$label:',
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          Text(
-            'Percentile: ${result.percentile.toStringAsFixed(2)}',
-            style: TextStyle(color: _getColorForLevel(result.level)),
+          Row(
+            children: [
+              Text(
+                '$label:',
+                style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo),
+              ),
+              const SizedBox(width: 10),
+              Chip(
+                label: Text('Percentile: ${result.percentile.toStringAsFixed(2)}'),
+                backgroundColor: _getColorForLevel(result.level).withOpacity(0.15),
+                labelStyle: TextStyle(color: _getColorForLevel(result.level), fontWeight: FontWeight.bold),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+              ),
+            ],
           ),
           Text(result.description),
           const SizedBox(height: 4),
@@ -232,8 +241,8 @@ class _ChildGrowthDataPageState extends State<ChildGrowthDataPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.childName}\'s Growth Data'),
-        backgroundColor: Colors.black,
+        title: Text("${widget.childName}'s Growth Data"),
+        backgroundColor: Colors.blue.shade700,
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
@@ -278,31 +287,38 @@ class _ChildGrowthDataPageState extends State<ChildGrowthDataPage> {
                           // Growth Chart Section
                           Text(
                             'Growth History Charts',
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.indigo,
+                                ),
                           ),
-                          const SizedBox(height: 15),
+                          const SizedBox(height: 18),
                           _buildGrowthChart('Weight (kg)', _growthData.map((e) => e.weight).toList(), (data) => data.weight),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 22),
                           _buildGrowthChart('Height (cm)', _growthData.map((e) => e.height).toList(), (data) => data.height),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 22),
                           if (_growthData.any((e) => e.bmi != null && e.bmi! > 0))
                             _buildGrowthChart('BMI', _growthData.where((e) => e.bmi != null).map((e) => e.bmi!).toList(), (data) => data.bmi),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 22),
                           if (_growthData.any((e) => e.headCircumference != null && e.headCircumference! > 0))
                             _buildGrowthChart('Head Circumference (cm)', _growthData.where((e) => e.headCircumference != null).map((e) => e.headCircumference!).toList(), (data) => data.headCircumference),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 22),
                           if (_growthData.any((e) => e.armCircumference != null && e.armCircumference! > 0))
                             _buildGrowthChart('Arm Circumference (cm)', _growthData.where((e) => e.armCircumference != null).map((e) => e.armCircumference!).toList(), (data) => data.armCircumference),
 
-                          const SizedBox(height: 30),
+                          const SizedBox(height: 32),
 
                           // Detailed Growth Results Section
                           Text(
                             'Detailed Growth Results',
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.indigo,
+                                ),
                           ),
-                          const SizedBox(height: 15),
+                          const SizedBox(height: 18),
                           ListView.builder(
+                            reverse: true,
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
                             itemCount: _growthData.length,
@@ -311,40 +327,59 @@ class _ChildGrowthDataPageState extends State<ChildGrowthDataPage> {
                               final formattedDate = "${growthEntry.inputDate.toLocal().day}/${growthEntry.inputDate.toLocal().month}/${growthEntry.inputDate.toLocal().year}";
 
                               return Card(
-                                margin: const EdgeInsets.symmetric(vertical: 8.0),
-                                elevation: 2,
-                                child: ExpansionTile(
-                                  title: Text(
-                                    'Growth Data on $formattedDate',
-                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                margin: const EdgeInsets.symmetric(vertical: 10.0),
+                                elevation: 3,
+                                color: Colors.blue.shade50,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Theme(
+                                  data: Theme.of(context).copyWith(
+                                    dividerColor: Colors.transparent,
+                                    splashColor: Colors.blue.shade100,
+                                    highlightColor: Colors.blue.shade50,
                                   ),
-                                  subtitle: Text(
-                                    'Weight: ${growthEntry.weight} kg, Height: ${growthEntry.height} cm',
-                                  ),
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          _buildGrowthResultRow('Weight', growthEntry.growthResult?.weight),
-                                          _buildGrowthResultRow('Height', growthEntry.growthResult?.height),
-                                          _buildGrowthResultRow('BMI', growthEntry.growthResult?.bmi),
-                                          _buildGrowthResultRow('Head Circumference', growthEntry.growthResult?.headCircumference),
-                                          _buildGrowthResultRow('Arm Circumference', growthEntry.growthResult?.armCircumference),
-                                          _buildGrowthResultRow('Weight For Length', growthEntry.growthResult?.weightForLength),
-                                          if (growthEntry.growthResult?.description != null && growthEntry.growthResult!.description!.isNotEmpty)
-                                            Padding(
-                                              padding: const EdgeInsets.only(top: 8.0),
-                                              child: Text(
-                                                'Overall Description: ${growthEntry.growthResult!.description!}',
-                                                style: const TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
-                                              ),
-                                            ),
-                                        ],
+                                  child: ExpansionTile(
+                                    leading: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.shade100,
+                                        shape: BoxShape.circle,
                                       ),
+                                      padding: const EdgeInsets.all(8),
+                                      child: Icon(Icons.bar_chart, color: Colors.indigo, size: 24),
                                     ),
-                                  ],
+                                    title: Text(
+                                      'Growth Data on $formattedDate',
+                                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.indigo),
+                                    ),
+                                    subtitle: Text(
+                                      'Weight: ${growthEntry.weight} kg, Height: ${growthEntry.height} cm',
+                                    ),
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            _buildGrowthResultRow('Weight', growthEntry.growthResult?.weight),
+                                            _buildGrowthResultRow('Height', growthEntry.growthResult?.height),
+                                            _buildGrowthResultRow('BMI', growthEntry.growthResult?.bmi),
+                                            _buildGrowthResultRow('Head Circumference', growthEntry.growthResult?.headCircumference),
+                                            _buildGrowthResultRow('Arm Circumference', growthEntry.growthResult?.armCircumference),
+                                            _buildGrowthResultRow('Weight For Length', growthEntry.growthResult?.weightForLength),
+                                            if (growthEntry.growthResult?.description != null && growthEntry.growthResult!.description!.isNotEmpty)
+                                              Padding(
+                                                padding: const EdgeInsets.only(top: 8.0),
+                                                child: Text(
+                                                  'Overall Description: ${growthEntry.growthResult!.description!}',
+                                                  style: const TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               );
                             },

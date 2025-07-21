@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:children_tracking_mobileapp/provider/auth_provider.dart';
 import 'package:children_tracking_mobileapp/services/auth_service.dart';
 import 'package:children_tracking_mobileapp/utils/snackbar.dart';
+import 'package:children_tracking_mobileapp/components/custom_app_bar.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -70,31 +71,9 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Settings',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            SizedBox(width: 8),
-            Icon(
-              Icons.settings,
-              size: 28,
-            ),
-          ],
-        ),
-        centerTitle: true,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            bottomRight: Radius.circular(25),
-            bottomLeft: Radius.circular(25),
-          ),
-        ),
-        toolbarHeight: 70,
-        elevation: 8.0,
+      appBar: const CustomAppBar(
+        title: 'Settings',
+        icon: Icons.settings,
       ),
       body: Center(
         child: Padding(
@@ -153,27 +132,41 @@ class _SettingsPageState extends State<SettingsPage> {
                   : Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const CircleAvatar(
-                          radius: 60,
-                          backgroundColor: Colors.blueGrey,
-                          child: Icon(Icons.person, size: 80, color: Colors.white),
+                        // Profile avatar with blue accent
+                        Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              colors: [Colors.blue.shade400, Colors.indigo.shade400],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                          ),
+                          padding: const EdgeInsets.all(4),
+                          child: CircleAvatar(
+                            radius: 60,
+                            backgroundColor: Colors.blue.shade50,
+                            child: Icon(Icons.person, size: 70, color: Colors.blueAccent),
+                          ),
                         ),
-                        const SizedBox(height: 30),
+                        const SizedBox(height: 26),
                         Text(
                           'Welcome, ${_userProfile!['name'] ?? 'User'}!',
-                          style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).textTheme.headlineSmall?.color),
+                          style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.indigo,
+                          ),
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 15),
+                        const SizedBox(height: 18),
                         Card(
-                          margin: const EdgeInsets.symmetric(horizontal: 20),
-                          elevation: 6,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                          margin: const EdgeInsets.symmetric(horizontal: 10),
+                          elevation: 4,
+                          color: Colors.blue.shade50,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                           child: Padding(
-                            padding: const EdgeInsets.all(20.0),
+                            padding: const EdgeInsets.all(22.0),
                             child: Column(
                               children: [
                                 _buildProfileDetailRow(
@@ -182,7 +175,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                   label: 'Email:',
                                   value: _userProfile!['email'] ?? 'N/A',
                                 ),
-                                const Divider(height: 20, thickness: 1),
+                                const Divider(height: 24, thickness: 1),
                                 _buildProfileDetailRow(
                                   context,
                                   icon: Icons.work,
@@ -193,22 +186,25 @@ class _SettingsPageState extends State<SettingsPage> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 40),
-                        ElevatedButton.icon(
-                          onPressed: () => _logout(context),
-                          icon: const Icon(Icons.logout),
-                          label: const Text(
-                            'Logout',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.redAccent,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 18),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
+                        const SizedBox(height: 36),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed: () => _logout(context),
+                            icon: const Icon(Icons.logout),
+                            label: const Text(
+                              'Logout',
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                             ),
-                            elevation: 8,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.redAccent,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 18),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              elevation: 8,
+                            ),
                           ),
                         ),
                       ],
@@ -224,23 +220,32 @@ class _SettingsPageState extends State<SettingsPage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 24),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.blue.shade100,
+              shape: BoxShape.circle,
+            ),
+            padding: const EdgeInsets.all(8),
+            child: Icon(icon, size: 22, color: Colors.indigo),
+          ),
           const SizedBox(width: 15),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 label,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
+                  color: Colors.indigo,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 value,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 18,
+                  color: Colors.black87,
                 ),
               ),
             ],
