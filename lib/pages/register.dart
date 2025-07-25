@@ -1,51 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:children_tracking_mobileapp/main.dart';
-import 'package:children_tracking_mobileapp/pages/register.dart';
-import 'package:provider/provider.dart';
-import 'package:children_tracking_mobileapp/provider/auth_provider.dart';
+import 'package:children_tracking_mobileapp/pages/login.dart';
 import 'package:children_tracking_mobileapp/services/auth_service.dart';
 import 'package:children_tracking_mobileapp/utils/snackbar.dart';
 import 'package:children_tracking_mobileapp/components/custom_app_bar.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   bool _isLoading = false;
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _login() async {
+  Future<void> _register() async {
+    if (_passwordController.text != _confirmPasswordController.text) {
+      showAppSnackBar(context, 'Passwords do not match.');
+      return;
+    }
     setState(() {
       _isLoading = true;
     });
     try {
-      final result = await AuthService().login(
+      await AuthService().register(
+        name: _nameController.text,
         email: _emailController.text,
         password: _passwordController.text,
       );
-      final accessToken = result['accessToken'] as String;
-      final userId = result['userId'] as String;
-      await Provider.of<AuthProvider>(context, listen: false).login(accessToken, userId);
-      showAppSnackBar(context, 'Login successful!', backgroundColor: Colors.green);
+      showAppSnackBar(
+        context,
+        'Registration successful! Please log in.',
+        backgroundColor: Colors.green,
+      );
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const RootPage()),
+        MaterialPageRoute(builder: (context) => const LoginPage()),
       );
     } catch (e) {
-      showAppSnackBar(context, 'Login failed: $e');
+      showAppSnackBar(context, 'Error during registration: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -57,8 +65,8 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(
-        title: 'Login',
-        icon: Icons.login,
+        title: 'Register',
+        icon: Icons.app_registration,
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -70,12 +78,12 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 10),
               Lottie.network(
                 'https://lottie.host/1ce27522-55ba-4f73-a824-4c2dc116d2c9/q97IkZp70L.json',
-                height: 160,
+                height: 150,
                 repeat: true,
                 reverse: false,
                 animate: true,
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 16),
               Card(
                 color: Colors.blue.shade50,
                 elevation: 4,
@@ -86,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        'Welcome Back!',
+                        'Create Account',
                         style: TextStyle(
                           fontSize: 26,
                           fontWeight: FontWeight.bold,
@@ -94,7 +102,22 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 22),
+                      TextField(
+                        controller: _nameController,
+                        decoration: InputDecoration(
+                          labelText: 'Name',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: const BorderSide(color: Colors.indigo, width: 2),
+                          ),
+                          prefixIcon: const Icon(Icons.person, color: Colors.indigo),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
                       TextField(
                         controller: _emailController,
                         decoration: InputDecoration(
@@ -110,11 +133,27 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         keyboardType: TextInputType.emailAddress,
                       ),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 16),
                       TextField(
                         controller: _passwordController,
                         decoration: InputDecoration(
                           labelText: 'Password',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: const BorderSide(color: Colors.indigo, width: 2),
+                          ),
+                          prefixIcon: const Icon(Icons.lock, color: Colors.indigo),
+                        ),
+                        obscureText: true,
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _confirmPasswordController,
+                        decoration: InputDecoration(
+                          labelText: 'Confirm Password',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12.0),
                           ),
@@ -132,7 +171,7 @@ class _LoginPageState extends State<LoginPage> {
                           : SizedBox(
                               width: double.infinity,
                               child: ElevatedButton(
-                                onPressed: _login,
+                                onPressed: _register,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.indigo,
                                   foregroundColor: Colors.white,
@@ -143,7 +182,7 @@ class _LoginPageState extends State<LoginPage> {
                                   elevation: 6,
                                 ),
                                 child: const Text(
-                                  'Login',
+                                  'Register',
                                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                                 ),
                               ),
@@ -152,20 +191,18 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 32),
-              Divider(color: Colors.grey.shade300, height: 1, endIndent: 50, indent: 50),
               const SizedBox(height: 28),
+              Divider(color: Colors.grey.shade300, height: 1, endIndent: 50, indent: 50),
+              const SizedBox(height: 24),
               TextButton(
                 onPressed: () {
-                  Navigator.push(
+                  Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const RegisterPage(),
-                    ),
+                    MaterialPageRoute(builder: (context) => const LoginPage()),
                   );
                 },
                 child: Text(
-                  'Don\'t have an account? Register now',
+                  'Already have an account? Login',
                   style: TextStyle(
                     fontSize: 16,
                     decoration: TextDecoration.underline,
